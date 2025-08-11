@@ -1,0 +1,52 @@
+.window {
+    position: absolute;
+  }
+  
+  .resize-handle {
+    position: absolute;
+    /* El resto de los estilos, como el cursor y el tamaño */
+  }
+  
+  /* Bordes para arrastrar */
+  .resize-handle.n,
+  .resize-handle.s {
+    left: 0;
+    right: 0;
+    height: 8px; /* Ejemplo */
+    cursor: ns-resize;
+  }
+  
+  .resize-handle.n { top: 0; }
+  .resize-handle.s { bottom: 0; }
+  
+  .resize-handle.e,
+  .resize-handle.w {
+    top: 0;
+    bottom: 0;
+    width: 8px; /* Ejemplo */
+    cursor: ew-resize;
+  }
+  
+  .resize-handle.e { right: 0; }
+  .resize-handle.w { left: 0; }
+  
+  /* Esquinas */
+  .resize-handle.nw,
+  .resize-handle.se {
+    width: 16px;
+    height: 16px;
+    cursor: nwse-resize;
+  }
+  
+  .resize-handle.nw { top: 0; left: 0; }
+  .resize-handle.se { bottom: 0; right: 0; }
+  
+  .resize-handle.ne,
+  .resize-handle.sw {
+    width: 16px;
+    height: 16px;
+    cursor: nesw-resize;
+  }
+  
+  .resize-handle.ne { top: 0; right: 0; }
+  .resize-handle.sw { bottom: 0; left: 0; }
