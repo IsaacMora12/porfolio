@@ -3,7 +3,6 @@ import WindowComponent from './componets/window';
 import { useWindowManager } from './domain/window/useWindowManager';
 import { CurriculumComponent } from './pages/Curriculo';
 
-// Keep for potential future layout calculations
 
 function Desktop() {
   const { windows, create, bringToFront, move, resize, close, minimize, toggleMaximize } = useWindowManager();

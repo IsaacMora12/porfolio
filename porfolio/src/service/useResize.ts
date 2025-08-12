@@ -60,7 +60,7 @@ export function useResize({ id, isMaximized, position, size, onResize }: UseResi
         let nextX = startX;
         let nextY = startY;
 
-        // Lógica para redimensionar desde los bordes
+     
         if (direction?.includes('e')) {
           nextWidth = clamp(startWidth + dx, MIN_WIDTH, window.innerWidth - startX);
         }
