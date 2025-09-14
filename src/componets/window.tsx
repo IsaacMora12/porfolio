@@ -85,7 +85,7 @@ export default function WindowComponent(props: WindowProps) {
   return (
     <div
       style={style}
-      className={`select-none rounded-md shadow-lg bg-neutral-900 text-oldgreen border border-dashed border-oldgreen ${activeRing}`}
+      className={`select-none rounded-md shadow-lg pb-2 bg-black text-oldgreen border border-dashed border-oldgreen ${activeRing}`}
       onMouseDown={() => onFocus(id)}
     >
       <div
@@ -97,18 +97,18 @@ export default function WindowComponent(props: WindowProps) {
         <div className="flex items-center justify-center gap-2 bg-black ">
         
            
-          <span className="group p-2 hover:bg-oldgreen rounded-lg" onClick={() => onMinimize(id)} > 
+          <span className="cursor-pointer group p-2 hover:bg-oldgreen rounded-lg" onClick={() => onMinimize(id)} > 
     
           <svg 
     className="w-3 h-3 text-oldgreen stroke-current group-hover:text-black " 
     viewBox="0 0 24 24" 
     fill="none" 
     xmlns="http://www.w3.org/2000/svg">
-    <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-    <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+    <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
     <g id="SVGRepo_iconCarrier">
-      <g clip-path="url(#clip0_429_10979)">
-        <path d="M6 12H18" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+      <g clipPath="url(#clip0_429_10979)">
+        <path d="M6 12H18" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"></path>
       </g>
       <defs>
         <clipPath id="clip0_429_10979">
@@ -118,19 +118,19 @@ export default function WindowComponent(props: WindowProps) {
     </g>
   </svg>
           </span>
-          <span className=" group p-2 hover:bg-oldgreen rounded-lg" onClick={() => onToggleMaximize(id)} > 
+          <span className=" cursor-pointer group p-2 hover:bg-oldgreen rounded-lg" onClick={() => onToggleMaximize(id)} > 
           <svg 
   className="text-oldgreen group-hover:text-black w-3 h-3 stroke-current" 
   viewBox="0 0 24 24" 
   fill="none" 
   xmlns="http://www.w3.org/2000/svg" 
   transform="matrix(-1, 0, 0, 1, 0, 0)rotate(0)">
-  <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
-  <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+  <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+  <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
   <g id="SVGRepo_iconCarrier">
-    <g clip-path="url(#clip0_429_11155)">
-      <path d="M16 3H4V16" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
-      <path d="M8 7H20V19C20 20.1046 19.1046 21 18 21H10C8.89543 21 8 20.1046 8 19V7Z" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+    <g clipPath="url(#clip0_429_11155)">
+      <path d="M16 3H4V16" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"></path>
+      <path d="M8 7H20V19C20 20.1046 19.1046 21 18 21H10C8.89543 21 8 20.1046 8 19V7Z" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"></path>
     </g>
     <defs>
       <clipPath id="clip0_429_11155">
@@ -143,7 +143,7 @@ export default function WindowComponent(props: WindowProps) {
 
           </span>
 
-          <span className="group p-2 hover:bg-oldgreen rounded-lg " onClick={() => onClose(id)}>
+          <span className="group cursor-pointer p-2 hover:bg-oldgreen rounded-lg " onClick={() => onClose(id)}>
             <svg 
                 className="text-oldgreen group-hover:text-black w-3 h-3 stroke-current" 
                 viewBox="0 0 24 24" 

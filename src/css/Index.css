@@ -1,18 +1,20 @@
 @import "tailwindcss";
 @import "./windowsStyles.css";
+@import "./hologram_botoms_curriculum.css";
 
 
 :root{
-    background-color:  #231f20;
+    background-color:  #000000;
     max-width: 100%;
     max-height: 100%;
     overflow: hidden;
+    scrollbar-color: #37ff14 #000000;
     
 }
 
 @theme{
  --color-oldgreen: #37ff14;
- --color-abbadinBlack: #231f20;
+ --color-abbadonBlack: #231f20;
 
 }
 

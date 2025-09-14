@@ -21,6 +21,7 @@ export interface WindowState {
   isMinimized: boolean;
   isMaximized: boolean;
   content?: React.ReactNode;
+  icon?: string;
 }
 
 export interface CreateWindowOptions {
@@ -29,6 +30,6 @@ export interface CreateWindowOptions {
   position?: Partial<WindowPosition>;
   size?: Partial<WindowSize>;
   content?: React.ReactNode;
+  icon?: string;
 }
-
 

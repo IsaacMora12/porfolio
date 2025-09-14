@@ -1,0 +1,871 @@
+
+/* Estilos para animaciones 3D */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+/* Rotación continua */
+@keyframes rotate-y {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+.rotating-card {
+  animation: rotate-y 8s linear infinite;
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.rotating-card:hover {
+  animation-play-state: paused;
+  transform: rotateY(0deg) scale(1.05);
+}
+
+/* Hover 3D effect */
+.hover-3d-card {
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease;
+}
+
+.hover-3d-card:hover {
+  transform: rotateX(-10deg) rotateY(10deg) scale(1.05);
+}
+
+/* Flip card */
+.flip-card {
+  width: 100%;
+  height: 300px;
+  position: relative;
+}
+
+.flip-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+}
+
+.flip-card.flipped .flip-card-inner {
+  transform: rotateY(180deg);
+  box-shadow: 0 20px 40px rgba(147, 51, 234, 0.4);
+}
+
+.flip-card-front,
+.flip-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  background: linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(147, 51, 234, 0.15) 100%);
+}
+
+.flip-card-back {
+  transform: rotateY(180deg);
+}
+
+/* Mouse tracking card */
+.mouse-tracking-card {
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease;
+}
+
+/* Animación de entrada */
+@keyframes entrance-3d {
+  0% {
+    transform: rotateY(-90deg) translateZ(-100px);
+    opacity: 0;
+  }
+  50% {
+    transform: rotateY(-45deg) translateZ(-50px);
+    opacity: 0.5;
+  }
+  100% {
+    transform: rotateY(0deg) translateZ(0px);
+    opacity: 1;
+  }
+}
+
+.entrance-animation {
+  animation: entrance-3d 1.5s ease-out;
+  transform-style: preserve-3d;
+}
+
+/* Efecto de profundidad */
+.depth-card {
+  transform-style: preserve-3d;
+  transition: all 0.3s ease;
+}
+
+.depth-card:hover {
+  transform: translateZ(50px) rotateX(5deg) rotateY(-5deg);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+/* Mejoras generales para 3D */
+.perspective-1000 > * {
+  transform-style: preserve-3d;
+}
+
+/* Animación adicional para elementos internos */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.floating-element {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Agregando efectos de cristal y glass morphism */
+
+/* Efecto glass morphism base */
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Sombras de cristal */
+.shadow-crystal {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.1);
+}
+
+/* Efecto de brillo/shine en cristales */
+.crystal-shine {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+  transform: rotate(45deg);
+  animation: crystal-shine 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes crystal-shine {
+  0%,
+  100% {
+    transform: rotate(45deg) translateX(-100%);
+    opacity: 0;
+  }
+  50% {
+    transform: rotate(45deg) translateX(100%);
+    opacity: 1;
+  }
+}
+
+/* Brillo dinámico para mouse tracking */
+.dynamic-shine {
+  animation: crystal-shine 2s ease-in-out infinite;
+}
+
+/* Texto con efecto cristal */
+.crystal-text {
+  background: linear-gradient(45deg, #ffffff, #a855f7, #06b6d4, #ffffff);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: crystal-text-glow 4s ease-in-out infinite;
+}
+
+@keyframes crystal-text-glow {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* Cristal rotante con efectos mejorados */
+.crystal-rotating-card {
+  animation: crystal-rotate 8s linear infinite;
+  transform-style: preserve-3d;
+  transition: all 0.3s ease;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.15) 0%,
+    rgba(147, 51, 234, 0.15) 50%,
+    rgba(59, 130, 246, 0.15) 100%
+  );
+}
+
+@keyframes crystal-rotate {
+  0% {
+    transform: rotateY(0deg) rotateX(0deg);
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+  }
+  25% {
+    transform: rotateY(90deg) rotateX(5deg);
+    box-shadow: 0 12px 40px rgba(147, 51, 234, 0.4);
+  }
+  50% {
+    transform: rotateY(180deg) rotateX(0deg);
+    box-shadow: 0 8px 32px rgba(6, 182, 212, 0.3);
+  }
+  75% {
+    transform: rotateY(270deg) rotateX(-5deg);
+    box-shadow: 0 12px 40px rgba(147, 51, 234, 0.4);
+  }
+  100% {
+    transform: rotateY(360deg) rotateX(0deg);
+    box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
+  }
+}
+
+.crystal-rotating-card:hover {
+  animation-play-state: paused;
+  transform: rotateY(0deg) scale(1.05) translateZ(20px);
+  box-shadow: 0 20px 60px rgba(59, 130, 246, 0.5);
+}
+
+/* Cristal hover con refracción */
+.crystal-hover-card {
+  transform-style: preserve-3d;
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%);
+}
+
+.crystal-hover-card:hover {
+  transform: rotateX(-15deg) rotateY(15deg) scale(1.05) translateZ(30px);
+  box-shadow: 0 25px 50px rgba(16, 185, 129, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.crystal-hover-card:hover .crystal-shine {
+  animation-duration: 1s;
+}
+
+/* Cristal tracking con efectos dinámicos */
+.crystal-tracking-card {
+  transform-style: preserve-3d;
+  transition: all 0.1s ease;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
+}
+
+.crystal-tracking-card:hover {
+  box-shadow: 0 20px 40px rgba(99, 102, 241, 0.4), 0 0 20px rgba(168, 85, 247, 0.3);
+}
+
+/* Cristal con animación de entrada mejorada */
+@keyframes crystal-entrance {
+  0% {
+    transform: rotateY(-90deg) translateZ(-100px) scale(0.5);
+    opacity: 0;
+    filter: blur(10px);
+  }
+  50% {
+    transform: rotateY(-45deg) translateZ(-50px) scale(0.8);
+    opacity: 0.7;
+    filter: blur(5px);
+  }
+  100% {
+    transform: rotateY(0deg) translateZ(0px) scale(1);
+    opacity: 1;
+    filter: blur(0px);
+  }
+}
+
+.crystal-entrance {
+  animation: crystal-entrance 2s ease-out;
+  transform-style: preserve-3d;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(59, 130, 246, 0.15) 100%);
+}
+
+/* Cristal con efecto de profundidad mejorado */
+.crystal-depth {
+  transform-style: preserve-3d;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(52, 211, 153, 0.15) 100%);
+}
+
+.crystal-depth:hover {
+  transform: translateZ(60px) rotateX(10deg) rotateY(-10deg) scale(1.05);
+  box-shadow: 0 30px 60px rgba(16, 185, 129, 0.5), 0 0 30px rgba(52, 211, 153, 0.3), inset 0 1px 0
+    rgba(255, 255, 255, 0.3);
+}
+
+.crystal-depth:hover .crystal-shine {
+  animation-duration: 1.5s;
+}
+
+/* Botón con efecto glass */
+.glass-button {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 25px rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Agregando efectos de profundidad 3D avanzados para objetos flotantes */
+
+/* Efecto flotante con profundidad real - múltiples capas de sombras */
+.floating-3d-deep {
+  transform-style: preserve-3d;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  animation: float-3d-deep 4s ease-in-out infinite;
+}
+
+@keyframes float-3d-deep {
+  0%,
+  100% {
+    transform: translateY(0px) translateZ(0px) rotateX(0deg) rotateY(0deg);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), 0 20px 60px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+  25% {
+    transform: translateY(-15px) translateZ(20px) rotateX(5deg) rotateY(-3deg);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 0 40px 80px rgba(0, 0, 0, 0.15), 0 0 20px rgba(59, 130, 246, 0.2), 0 0 0
+      1px rgba(255, 255, 255, 0.2);
+  }
+  50% {
+    transform: translateY(-20px) translateZ(30px) rotateX(0deg) rotateY(5deg);
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35), 0 50px 100px rgba(0, 0, 0, 0.2), 0 0 30px rgba(147, 51, 234, 0.3), 0 0
+      0 1px rgba(255, 255, 255, 0.25);
+  }
+  75% {
+    transform: translateY(-15px) translateZ(20px) rotateX(-5deg) rotateY(3deg);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 0 40px 80px rgba(0, 0, 0, 0.15), 0 0 20px rgba(6, 182, 212, 0.2), 0 0 0
+      1px rgba(255, 255, 255, 0.2);
+  }
+}
+
+.floating-3d-deep:hover {
+  animation-play-state: paused;
+  transform: translateY(-25px) translateZ(50px) rotateX(10deg) rotateY(-10deg) scale(1.05);
+  box-shadow:
+    0 40px 80px rgba(0, 0, 0, 0.4),
+    0 60px 120px rgba(0, 0, 0, 0.25),
+    0 0 40px rgba(59, 130, 246, 0.4),
+    0 0 0 2px rgba(255, 255, 255, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* Cristal flotante con caras laterales visibles */
+.crystal-cube-floating {
+  transform-style: preserve-3d;
+  position: relative;
+  animation: cube-float-rotate 6s ease-in-out infinite;
+}
+
+@keyframes cube-float-rotate {
+  0%,
+  100% {
+    transform: translateY(0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+  }
+  25% {
+    transform: translateY(-20px) rotateX(15deg) rotateY(90deg) rotateZ(5deg);
+  }
+  50% {
+    transform: translateY(-30px) rotateX(0deg) rotateY(180deg) rotateZ(0deg);
+  }
+  75% {
+    transform: translateY(-20px) rotateX(-15deg) rotateY(270deg) rotateZ(-5deg);
+  }
+}
+
+/* Pseudo-elementos para crear caras del cubo */
+.crystal-cube-floating::before,
+.crystal-cube-floating::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(147, 51, 234, 0.1) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-radius: inherit;
+}
+
+.crystal-cube-floating::before {
+  transform: rotateY(90deg) translateZ(150px);
+  background: linear-gradient(135deg, rgba(147, 51, 234, 0.15) 0%, rgba(6, 182, 212, 0.15) 100%);
+}
+
+.crystal-cube-floating::after {
+  transform: rotateX(90deg) translateZ(150px);
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(16, 185, 129, 0.15) 100%);
+}
+
+/* Efecto de levitación con partículas de luz */
+.levitating-crystal {
+  transform-style: preserve-3d;
+  position: relative;
+  animation: levitate-with-particles 5s ease-in-out infinite;
+}
+
+@keyframes levitate-with-particles {
+  0%,
+  100% {
+    transform: translateY(0px) translateZ(0px) rotateX(0deg) rotateY(0deg);
+    filter: drop-shadow(0 10px 20px rgba(59, 130, 246, 0.3));
+  }
+  33% {
+    transform: translateY(-25px) translateZ(40px) rotateX(10deg) rotateY(120deg);
+    filter: drop-shadow(0 25px 40px rgba(147, 51, 234, 0.4)) drop-shadow(0 0 30px rgba(147, 51, 234, 0.2));
+  }
+  66% {
+    transform: translateY(-35px) translateZ(60px) rotateX(-5deg) rotateY(240deg);
+    filter: drop-shadow(0 35px 60px rgba(6, 182, 212, 0.4)) drop-shadow(0 0 40px rgba(6, 182, 212, 0.3));
+  }
+}
+
+.levitating-crystal:hover {
+  animation-play-state: paused;
+  transform: translateY(-40px) translateZ(80px) rotateX(15deg) rotateY(-15deg) scale(1.1);
+  filter: drop-shadow(0 50px 100px rgba(59, 130, 246, 0.5)) drop-shadow(0 0 60px rgba(147, 51, 234, 0.4));
+}
+
+/* Partículas flotantes alrededor del cristal */
+.crystal-particles {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.8) 0%, transparent 70%);
+  border-radius: 50%;
+  animation: particle-float 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.crystal-particles:nth-child(1) {
+  top: 10%;
+  left: 20%;
+  animation-delay: 0s;
+}
+
+.crystal-particles:nth-child(2) {
+  top: 30%;
+  right: 15%;
+  animation-delay: 1s;
+}
+
+.crystal-particles:nth-child(3) {
+  bottom: 20%;
+  left: 30%;
+  animation-delay: 2s;
+}
+
+@keyframes particle-float {
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-20px) scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Cristal con efecto de refracción profunda */
+.deep-refraction-crystal {
+  transform-style: preserve-3d;
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(59, 130, 246, 0.1) 0%,
+    rgba(147, 51, 234, 0.15) 25%,
+    rgba(6, 182, 212, 0.1) 50%,
+    rgba(16, 185, 129, 0.15) 75%,
+    rgba(59, 130, 246, 0.1) 100%
+  );
+  background-size: 400% 400%;
+  animation: deep-refraction 8s ease-in-out infinite, float-deep-refraction 6s ease-in-out infinite;
+}
+
+@keyframes deep-refraction {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes float-deep-refraction {
+  0%,
+  100% {
+    transform: translateY(0px) translateZ(0px) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+    box-shadow: 0 15px 35px rgba(59, 130, 246, 0.3), 0 25px 65px rgba(0, 0, 0, 0.2), inset 0 1px 0
+      rgba(255, 255, 255, 0.2);
+  }
+  25% {
+    transform: translateY(-20px) translateZ(30px) rotateX(8deg) rotateY(90deg) rotateZ(2deg);
+    box-shadow: 0 25px 50px rgba(147, 51, 234, 0.4), 0 40px 80px rgba(0, 0, 0, 0.25), inset 0 1px 0
+      rgba(255, 255, 255, 0.3);
+  }
+  50% {
+    transform: translateY(-30px) translateZ(50px) rotateX(0deg) rotateY(180deg) rotateZ(0deg);
+    box-shadow: 0 35px 70px rgba(6, 182, 212, 0.4), 0 50px 100px rgba(0, 0, 0, 0.3), inset 0 1px 0
+      rgba(255, 255, 255, 0.4);
+  }
+  75% {
+    transform: translateY(-20px) translateZ(30px) rotateX(-8deg) rotateY(270deg) rotateZ(-2deg);
+    box-shadow: 0 25px 50px rgba(16, 185, 129, 0.4), 0 40px 80px rgba(0, 0, 0, 0.25), inset 0 1px 0
+      rgba(255, 255, 255, 0.3);
+  }
+}
+
+.deep-refraction-crystal:hover {
+  animation-play-state: paused;
+  transform: translateY(-40px) translateZ(70px) rotateX(20deg) rotateY(-20deg) scale(1.08);
+  box-shadow: 0 50px 100px rgba(59, 130, 246, 0.5), 0 70px 140px rgba(0, 0, 0, 0.4), 0 0 50px rgba(147, 51, 234, 0.4),
+    inset 0 2px 0 rgba(255, 255, 255, 0.5);
+}
+
+/* Agregando efectos de holograma con líneas de escaneo, brillos y partículas */
+
+/* Efectos de Holograma */
+
+/* Holograma básico */
+.hologram-card {
+  transform-style: preserve-3d;
+  position: relative;
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(0, 150, 255, 0.1) 100%);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+}
+
+.hologram-card:hover {
+  transform: translateY(-30px) translateZ(50px) rotateX(10deg) rotateY(-5deg) scale(1.05);
+  box-shadow: 0 40px 80px rgba(0, 255, 255, 0.3), 0 0 60px rgba(0, 150, 255, 0.4), inset 0 1px 0
+    rgba(255, 255, 255, 0.3);
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 150, 255, 0.2) 100%);
+}
+
+/* Líneas de escaneo holográfico */
+.hologram-scan-lines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 255, 0, 0.1) 2px,
+    rgba(0, 255, 26, 0.1) 4px
+  );
+  animation: hologram-scan 2s linear infinite;
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+@keyframes hologram-scan {
+  0% {
+    transform: translateY(-50%);
+  }
+  100% {
+    transform: translateY(50%);
+  }
+}
+
+/* Brillo holográfico */
+.hologram-glow {
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0, 255, 42, 0.2) 0%, transparent 70%);
+  animation: hologram-glow-pulse 4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes hologram-glow-pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+}
+
+/* Holograma levitante */
+
+/* .hologram-levitate:hover::after {
+  background: rgba(0, 255, 100, 0.4);
+  filter: blur(18px);
+  transform: translateY(25px) scale(1.2);
+} */
+
+
+/* Partículas holográficas */
+.hologram-particles {
+  position: absolute;
+  width: 3px;
+  height: 3px;
+  background: rgba(0, 255, 255, 0.8);
+  border-radius: 50%;
+  animation: hologram-particle-float 4s ease-in-out infinite;
+  pointer-events: none;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+.hologram-particles:nth-child(1) {
+  top: 15%;
+  left: 25%;
+  animation-delay: 0s;
+}
+
+.hologram-particles:nth-child(2) {
+  top: 60%;
+  right: 20%;
+  animation-delay: 1.5s;
+}
+
+.hologram-particles:nth-child(3) {
+  bottom: 25%;
+  left: 70%;
+  animation-delay: 3s;
+}
+
+@keyframes hologram-particle-float {
+  0%,
+  100% {
+    transform: translateY(0px) scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(-30px) scale(1.5);
+    opacity: 1;
+  }
+}
+
+/* Holograma con efecto glitch */
+.hologram-glitch {
+  transform-style: preserve-3d;
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 0, 255, 0.1) 0%, rgba(150, 0, 255, 0.1) 100%);
+  transition: all 0.3s ease;
+}
+
+.hologram-glitch:hover {
+  transform: translateY(-25px) translateZ(40px) rotateX(8deg) rotateY(-8deg) scale(1.05);
+  animation: hologram-glitch-effect 0.5s ease-in-out infinite;
+}
+
+.hologram-glitch-effect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 0, 255, 0.1) 50%, transparent 100%);
+  animation: glitch-sweep 0.3s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes hologram-glitch-effect {
+  0%,
+  90%,
+  100% {
+    transform: translateX(0);
+    filter: hue-rotate(0deg);
+  }
+  10% {
+    transform: translateX(-2px);
+    filter: hue-rotate(90deg);
+  }
+  20% {
+    transform: translateX(2px);
+    filter: hue-rotate(180deg);
+  }
+  30% {
+    transform: translateX(-1px);
+    filter: hue-rotate(270deg);
+  }
+}
+
+@keyframes glitch-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Holograma Matrix */
+.hologram-matrix {
+  transform-style: preserve-3d;
+  position: relative;
+  background: linear-gradient(135deg, rgba(0, 255, 0, 0.1) 0%, rgba(0, 150, 0, 0.1) 100%);
+  transition: all 0.4s ease;
+}
+
+.hologram-matrix:hover {
+  transform: translateY(-30px) translateZ(45px) rotateX(12deg) rotateY(-6deg) scale(1.06);
+  box-shadow: 0 40px 80px rgba(0, 255, 0, 0.3), 0 0 60px rgba(0, 150, 0, 0.4);
+}
+
+.hologram-matrix-rain {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    rgba(0, 255, 0, 0.1) 1px,
+    transparent 2px,
+    transparent 5px
+  );
+  animation: matrix-rain 1s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes matrix-rain {
+  0% {
+    transform: translateY(-10%);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Holograma energético */
+.hologram-energy {
+  transform-style: preserve-3d;
+  position: relative;
+  background: linear-gradient(135deg, rgba(255, 255, 0, 0.1) 0%, rgba(255, 150, 0, 0.1) 100%);
+  transition: all 0.4s ease;
+}
+
+.hologram-energy:hover {
+  transform: translateY(-35px) translateZ(55px) rotateX(15deg) rotateY(-8deg) scale(1.07);
+  box-shadow: 0 45px 90px rgba(255, 255, 0, 0.4), 0 0 70px rgba(255, 150, 0, 0.5);
+}
+
+.hologram-energy-field {
+  position: absolute;
+  top: -20%;
+  left: -20%;
+  right: -20%;
+  bottom: -20%;
+  background: radial-gradient(ellipse, rgba(255, 255, 0, 0.2) 0%, rgba(255, 150, 0, 0.1) 50%, transparent 100%);
+  animation: energy-pulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes energy-pulse {
+  0%,
+  100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+}
+
+/* Portal holográfico */
+.hologram-portal {
+  transform-style: preserve-3d;
+  position: relative;
+  background: linear-gradient(135deg, rgba(100, 0, 255, 0.1) 0%, rgba(200, 100, 255, 0.1) 100%);
+  transition: all 0.5s ease;
+  overflow: hidden;
+}
+
+.hologram-portal:hover {
+  transform: translateY(-40px) translateZ(70px) rotateX(20deg) rotateY(-10deg) scale(1.1);
+  box-shadow: 0 60px 120px rgba(100, 0, 255, 0.5), 0 0 100px rgba(200, 100, 255, 0.6);
+}
+
+.hologram-portal-effect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, rgba(100, 0, 255, 0.4) 0%, rgba(200, 100, 255, 0.2) 50%, transparent 100%);
+  border-radius: 50%;
+  animation: portal-expand 3s ease-in-out infinite;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes portal-expand {
+  0%,
+  100% {
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+  50% {
+    width: 200px;
+    height: 200px;
+    opacity: 1;
+  }
+}
+
+/* Botón holográfico */
+.hologram-button {
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 150, 255, 0.2) 100%);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  color: rgba(0, 255, 255, 1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.hologram-button::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.4), transparent);
+  transition: left 0.5s ease;
+}
+
+.hologram-button:hover {
+  background: linear-gradient(135deg, rgba(0, 255, 255, 0.3) 0%, rgba(0, 150, 255, 0.3) 100%);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), inset 0 0 20px rgba(0, 255, 255, 0.1);
+  transform: translateY(-2px);
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+}
+
+.hologram-button:hover::before {
+  left: 100%;
+}

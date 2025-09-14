@@ -1,51 +1,62 @@
-import { useMemo, useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { WindowManager } from './WindowManager';
 import type { CreateWindowOptions, WindowId, WindowPosition, WindowSize, WindowState } from './types';
 
 export function useWindowManager() {
   const managerRef = useRef<WindowManager | null>(null);
   if (managerRef.current === null) managerRef.current = new WindowManager();
+  const manager = managerRef.current;
 
-  const [windows, setWindows] = useState<WindowState[]>(() => managerRef.current!.state);
+  const [windows, setWindows] = useState<WindowState[]>(() => manager.state);
 
-  const sync = useCallback(() => setWindows(managerRef.current!.state), []);
+  const sync = useCallback(() => setWindows(manager.state), [manager]);
 
-  const api = useMemo(() => {
-    const mgr = managerRef.current!;
-    return {
-      windows,
-      create: (options?: CreateWindowOptions) => {
-        mgr.createWindow(options);
-        sync();
-      },
-      bringToFront: (id: WindowId) => {
-        mgr.bringToFront(id);
-        sync();
-      },
-      move: (id: WindowId, x: number, y: number) => {
-        mgr.move(id, { x, y } as WindowPosition);
-        sync();
-      },
-      resize: (id: WindowId, width: number, height: number, x: number, y: number) => {
-        mgr.resize(id, { width, height } as WindowSize, { x, y } as WindowPosition);
-        sync();
-      },
-      close: (id: WindowId) => {
-        mgr.close(id);
-        sync();
-      },
-      minimize: (id: WindowId) => {
-        mgr.minimize(id);
-        sync();
-      },
-      toggleMaximize: (id: WindowId) => {
-        mgr.toggleMaximize(id);
-        sync();
-      },
-    };
-  }, [sync, windows]);
+  const create = useCallback((options?: CreateWindowOptions) => {
+    manager.createWindow(options);
+    sync();
+  }, [manager, sync]);
 
-  return api;
+  const bringToFront = useCallback((id: WindowId) => {
+    manager.bringToFront(id);
+    sync();
+  }, [manager, sync]);
+
+  const move = useCallback((id: WindowId, x: number, y: number) => {
+    manager.move(id, { x, y } as WindowPosition);
+    sync();
+  }, [manager, sync]);
+
+  const resize = useCallback((id: WindowId, width: number, height: number, x: number, y: number) => {
+    manager.resize(id, { width, height } as WindowSize, { x, y } as WindowPosition);
+    sync();
+  }, [manager, sync]);
+
+  const close = useCallback((id: WindowId) => {
+    manager.close(id);
+    sync();
+  }, [manager, sync]);
+
+  const minimize = useCallback((id: WindowId) => {
+    manager.minimize(id);
+    sync();
+  }, [manager, sync]);
+
+  const toggleMaximize = useCallback((id: WindowId) => {
+    manager.toggleMaximize(id);
+    sync();
+  }, [manager, sync]);
+
+
+  return {
+    windows,
+    icons: windows.map(w => w.icon),
+    create,
+    bringToFront,
+    move,
+    resize,
+    close,
+    minimize,
+    toggleMaximize,
+    
+  };
 }
-
-

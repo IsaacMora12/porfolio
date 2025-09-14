@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { WindowId, WindowPosition, WindowSize, WindowState, CreateWindowOptions } from './types';
 
+
 const DEFAULT_SIZE: WindowSize = { width: 480, height: 320 };
 const DEFAULT_POSITION: WindowPosition = { x: 40, y: 40 };
 
@@ -64,5 +65,3 @@ export class WindowEntity implements WindowState {
     if (this.isMaximized) this.isMinimized = false;
   }
 }
-
-

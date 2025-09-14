@@ -1,6 +1,7 @@
 import { WindowEntity } from './WindowEntity';
 import type { CreateWindowOptions, WindowId, WindowState, WindowPosition, WindowSize } from './types';
 
+
 export class WindowManager {
   private windows: WindowEntity[] = [];
   private topZ: number = 10;
@@ -49,6 +50,5 @@ export class WindowManager {
     if (!target) return;
     target.toggleMaximize();
   }
+
 }
-
-
