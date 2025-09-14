@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import type { ContentModule } from './types';
 
 
 // The static glob import is correct.
@@ -10,7 +11,7 @@ export function useContent() {
     console.log('Number of modules:', Object.keys(contentModules).length);
 
     // Get the raw component modules.
-    const loadedContents = Object.values(contentModules).map((module: any) => {
+    const loadedContents = (Object.values(contentModules) as ContentModule[]).map((module) => {
       console.log('Module:', module);
       console.log('Module default:', module.default);
       return module.default;

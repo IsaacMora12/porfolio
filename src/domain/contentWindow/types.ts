@@ -1,11 +1,16 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, ComponentType } from 'react';
 
 export interface ContentWindowMetadata {
   id: string;
   title: string;
   icon?: string | ReactNode;
 }
+
 export interface ContentWindowProps {
   metadata: ContentWindowMetadata;
   content: ReactNode;
+}
+
+export interface ContentModule {
+  default: ComponentType & { metadata: ContentWindowMetadata };
 }

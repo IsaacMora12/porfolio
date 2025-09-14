@@ -5,7 +5,7 @@ interface UseGridDragProps<T extends HTMLElement> {
   id: string;
   onDrop: (id: string, position: IconPosition) => void;
   gridCellSize: { width: number; height: number };
-  ref: RefObject<T>;
+  ref: RefObject<T | null>;
   threshold?: number;
 }
 

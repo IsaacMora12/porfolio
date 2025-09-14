@@ -3,8 +3,7 @@ import WindowComponent from './componets/window';
 import { useWindowManager } from './domain/window/useWindowManager';
 import DesktopGrid from './componets/DesktopGrid';
 import { useContent } from './domain/contentWindow/useContent';
-import { IconPosition } from './domain/icon/types';
-import { IconState } from './domain/icon/types';
+import type { IconPosition, IconState } from './domain/icon/types';
 
 function Desktop() {
   const { windows, create, bringToFront, move, resize, close, minimize, toggleMaximize } = useWindowManager();

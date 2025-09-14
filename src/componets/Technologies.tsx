@@ -1,4 +1,3 @@
-import React from 'react';
 import {  AiOutlineDocker, AiOutlinePython,  } from 'react-icons/ai';
 import { PiFileCssThin, PiFileHtmlThin } from 'react-icons/pi';
 import { RiJavascriptLine, RiReactjsFill, RiTailwindCssLine } from 'react-icons/ri';
