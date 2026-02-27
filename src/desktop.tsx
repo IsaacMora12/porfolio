@@ -46,8 +46,8 @@ function Desktop() {
     );
   };
 
-  const minimized = useMemo(() => windows.filter((w) => w.isMinimized), [windows]);
-
+  const openWindows = useMemo(() => windows.filter((w) => w.isOpen), [windows]);
+  const activeWindows = useMemo(() => windows.filter((w) => !w.isActive), [windows]);
   if (!desktopIcons || desktopIcons.length === 0) {
     return (
       <section className="w-screen h-screen overflow-hidden bg-[--color-abbadinBlack] text-neutral-100">
@@ -91,14 +91,15 @@ function Desktop() {
           </WindowComponent>
         ))}
       </div>
-     
+     {// Taskbar
+     }
       <div className="fixed bottom-0 left-0 right-0 h-12 bg-black backdrop-blur border-t border-oldgreen border-dashed flex items-center gap-2 px-3">
         <div className="flex items-center gap-2 overflow-x-auto">
-          {minimized.map((w) => (
+          {openWindows.map((w) => (
             <button
               key={w.id}
               onClick={() => bringToFront(w.id)}
-              className="px-2 py-1 bg-black text-oldgreen rounded hover:bg-oldgreen/25 hover:text-black whitespace-nowrap"
+              className={`px-2 py-1 bg-black text-oldgreen rounded hover:bg-oldgreen/25 hover:text-black whitespace-nowrap ${w.isActive ? 'bg-oldgreen/15' : ''}`}
               title={w.title}
             >
               {w.title}

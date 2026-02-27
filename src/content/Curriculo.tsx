@@ -16,7 +16,7 @@ export const CurriculumComponent = () => {
       </header>
 
       <section className="mb-8 glitch" data-text="sobre-mi">
-        <h2 className="text-xl font-bold mb-4 glitch">Technologies</h2>
+       
         <div className="flex flex-wrap gap-4">
           <Technologies />
         </div>
