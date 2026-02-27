@@ -3,12 +3,14 @@ import WindowComponent from './componets/window';
 import { useWindowManager } from './domain/window/useWindowManager';
 import DesktopGrid from './componets/DesktopGrid';
 import { useContent } from './domain/contentWindow/useContent';
+import BootScreen from './componets/BootScreen';
 import type { IconPosition, IconState } from './domain/icon/types';
 
 function Desktop() {
   const { windows, create, bringToFront, move, resize, close, minimize, toggleMaximize } = useWindowManager();
   const { contents } = useContent();
   const [desktopIcons, setDesktopIcons] = useState<IconState[]>([]);
+  const [isBooting, setIsBooting] = useState(true);
 
   useEffect(() => {
     if (contents && Array.isArray(contents)) {
@@ -47,7 +49,12 @@ function Desktop() {
   };
 
   const openWindows = useMemo(() => windows.filter((w) => w.isOpen), [windows]);
-  const activeWindows = useMemo(() => windows.filter((w) => !w.isActive), [windows]);
+
+  // Show boot screen until data is ready or minimum 3 seconds have passed
+  if (isBooting) {
+    return <BootScreen onBootComplete={() => setIsBooting(false)} minDuration={3000} />;
+  }
+
   if (!desktopIcons || desktopIcons.length === 0) {
     return (
       <section className="w-screen h-screen overflow-hidden bg-[--color-abbadinBlack] text-neutral-100">
