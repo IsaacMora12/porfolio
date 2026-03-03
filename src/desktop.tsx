@@ -307,6 +307,51 @@ function Desktop() {
     return () => windowEvents.off('open-curriculum', handleOpenCurriculum);
   }, [contents, create]);
 
+  // Listen for 'open-file-from-explorer' to open files clicked in FileExplorer
+  useEffect(() => {
+    const handleOpenFile = (data: unknown) => {
+      const { id, name } = data as { id: string; name: string };
+
+      // Special case: curriculum.txt opens the rich Curriculum component
+      if (name === 'curriculum.txt') {
+        const curriculumContent = contents?.find(c => c.metadata.title === 'Curriculum');
+        if (curriculumContent) {
+          create({
+            content: <curriculumContent.Component />,
+            title: 'Curriculum'
+          });
+        }
+        return;
+      }
+
+      // Check if the file is read-only
+      const item = fileSystemService.getItemById(id);
+      const isReadOnly = item && item.type !== 'folder' && (item as any).readOnly;
+
+      if (isReadOnly) {
+        // Open a read-only viewer (display content in a simple window)
+        const fileContent = item && 'content' in item ? (item as any).content : '';
+        create({
+          content: (
+            <div className="h-full flex flex-col bg-black text-oldgreen font-mono text-sm">
+              <div className="bg-black px-2 py-1 text-xs border-b border-dashed border-oldgreen flex justify-between">
+                <span>{name} (read-only)</span>
+              </div>
+              <div className="flex-1 overflow-auto p-3 whitespace-pre-wrap">{fileContent}</div>
+            </div>
+          ),
+          title: name
+        });
+      } else {
+        // Open in Nano editor
+        windowEvents.emit('open-nano', { name, id });
+      }
+    };
+
+    windowEvents.on('open-file-from-explorer', handleOpenFile);
+    return () => windowEvents.off('open-file-from-explorer', handleOpenFile);
+  }, [contents, create]);
+
   // All icons combined
   const allIcons = useMemo(() => {
     const fsFolderIds = new Set(filesystemFolders.map(f => f.id));

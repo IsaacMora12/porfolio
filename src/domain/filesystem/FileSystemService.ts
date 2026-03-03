@@ -224,6 +224,11 @@ export class FileSystemService {
     this.notify();
   }
 
+  // Get an item by its ID
+  getItemById(id: string): FileSystemItem | undefined {
+    return this.items.get(id);
+  }
+
   // Get current folder ID
   getCurrentFolderId(): string {
     return this.currentFolderId;

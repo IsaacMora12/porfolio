@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fileSystemService } from '../domain/filesystem/FileSystemService';
+import { windowEvents } from '../domain/window/WindowEvents';
 import type { FileNode } from '../domain/filesystem/types';
 
 interface ExplorerItem {
@@ -40,6 +41,9 @@ export default function FileExplorer() {
     if (item.type === 'folder') {
       // Navigate locally without affecting FileSystemService
       setCurrentPath([...currentPath, item.name]);
+    } else {
+      // Open the file via event -- desktop.tsx will handle creating the window
+      windowEvents.emit('open-file-from-explorer', { id: item.id, name: item.name });
     }
   };
 
