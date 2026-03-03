@@ -222,6 +222,10 @@ export class TerminalService {
           return 'nano: missing operand. Usage: nano <filename>';
         }
         const fileName = args[0];
+        // Check if file is read-only
+        if (fileSystemService.isFileReadOnly(fileName)) {
+          return `\x1b[31mnano: ${fileName}: Read-only file (permission denied)\x1b[0m`;
+        }
         // Check if file exists
         const items = fileSystemService.lsDirect();
         const file = items.find(item => item.name === fileName && item.type !== 'folder');
@@ -240,6 +244,39 @@ export class TerminalService {
           windowEvents.emit('open-nano', fileName);
         }
         return `Opening nano editor for: ${fileName}`;
+      },
+    },
+    {
+      name: 'open',
+      description: 'Open a file in its associated application',
+      execute: (args) => {
+        if (!args[0]) {
+          return 'open: missing operand. Usage: open <filename>';
+        }
+        const fileName = args[0];
+        const items = fileSystemService.lsDirect();
+        const file = items.find(item => item.name === fileName && item.type !== 'folder');
+        if (!file) {
+          const folder = items.find(item => item.name === fileName && item.type === 'folder');
+          if (folder) {
+            fileSystemService.navigateToFolder(folder.id);
+            windowEvents.emit('open-file-explorer');
+            return `Opening folder: ${fileName}`;
+          }
+          return `\x1b[31mopen: ${fileName}: No such file or directory\x1b[0m`;
+        }
+        // Special handling for curriculum
+        if (fileName === 'curriculum.txt') {
+          windowEvents.emit('open-curriculum');
+          return `Opening ${fileName}...`;
+        }
+        // For other files, open in nano (if not read-only) or display with cat
+        if (fileSystemService.isFileReadOnly(fileName)) {
+          const result = fileSystemService.cat(fileName);
+          return result.success ? result.message : `\x1b[31m${result.message}\x1b[0m`;
+        }
+        windowEvents.emit('open-nano', { name: fileName, id: file.id });
+        return `Opening ${fileName} in editor...`;
       },
     },
     {
@@ -323,8 +360,38 @@ export class TerminalService {
 
     if (!command) {
       if (commandName) {
+        // Check if it's a file in the current directory (like typing ./file or filename)
+        const fileName = commandName.startsWith('./') ? commandName.slice(2) : commandName;
+        const items = fileSystemService.lsDirect();
+        const file = items.find(item => item.name === fileName && item.type !== 'folder');
+        
+        if (file) {
+          // If the file is curriculum.txt, open the Curriculum window
+          if (fileName === 'curriculum.txt') {
+            windowEvents.emit('open-curriculum');
+            return [
+              { type: 'output', content: `Opening ${fileName}...` }
+            ];
+          }
+          // For other files, display content like cat
+          const result = fileSystemService.cat(fileName);
+          if (result.success) {
+            return [
+              { type: 'output', content: result.message }
+            ];
+          }
+        }
+
+        // Check if it's a folder
+        const folder = items.find(item => item.name === fileName && item.type === 'folder');
+        if (folder) {
+          lines.push({ type: 'input', content: input });
+          lines.push({ type: 'error', content: `bash: ${commandName}: Is a directory` });
+          return lines;
+        }
+
         lines.push({ type: 'input', content: input });
-        lines.push({ type: 'error', content: `Command not found: ${commandName}` });
+        lines.push({ type: 'error', content: `Command not found: ${commandName}. Type "help" for available commands.` });
       }
       return lines;
     }

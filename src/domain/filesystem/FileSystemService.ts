@@ -151,6 +151,7 @@ export class FileSystemService {
       parentId: desktopId,
       createdAt: Date.now(),
       updatedAt: Date.now(),
+      readOnly: true,
       content: [
         '============================================',
         '          ISAAC MORA\'S CODEX',
@@ -672,6 +673,9 @@ export class FileSystemService {
     }
     
     const file = node as FileNode;
+    if (file.readOnly) {
+      return { success: false, message: `write: ${path}: Read-only file` };
+    }
     file.content = content;
     file.updatedAt = Date.now();
     this.notify();
@@ -702,11 +706,28 @@ export class FileSystemService {
     }
     
     const file = node as FileNode;
+    if (file.readOnly) {
+      return { success: false, message: `writeFile: ${name}: Read-only file` };
+    }
     file.content = content;
     file.updatedAt = Date.now();
     this.notify();
     
     return { success: true, message: 'File written successfully' };
+  }
+
+  // Check if a file is read-only by name in current directory
+  isFileReadOnly(name: string): boolean {
+    const parent = this.items.get(this.currentFolderId) as FolderNode;
+    if (!parent || parent.type !== 'folder') return false;
+    const fileId = parent.children.find(id => {
+      const child = this.items.get(id);
+      return child?.name === name && child.type !== 'folder';
+    });
+    if (!fileId) return false;
+    const node = this.items.get(fileId);
+    if (!node || node.type === 'folder') return false;
+    return (node as FileNode).readOnly === true;
   }
 
   // Remove file or folder

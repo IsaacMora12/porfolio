@@ -1,5 +1,5 @@
 const DB_NAME = 'PortfolioFileSystem';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = 'filesystem';
 
 export class IndexedDBService {
@@ -16,16 +16,17 @@ export class IndexedDBService {
 
       request.onsuccess = () => {
         this.db = request.result;
-        console.log('IndexedDB opened successfully');
         resolve();
       };
 
       request.onupgradeneeded = (event) => {
         const db = (event.target as IDBOpenDBRequest).result;
         
-        if (!db.objectStoreNames.contains(STORE_NAME)) {
-          db.createObjectStore(STORE_NAME, { keyPath: 'id' });
+        // On version upgrade, delete and recreate the store to clear stale data
+        if (db.objectStoreNames.contains(STORE_NAME)) {
+          db.deleteObjectStore(STORE_NAME);
         }
+        db.createObjectStore(STORE_NAME, { keyPath: 'id' });
       };
     });
   }

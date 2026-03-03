@@ -292,6 +292,21 @@ function Desktop() {
     return unsubscribe;
   }, [fsReady, desktopIcons, contents, create, getOccupiedPositions, findNextAvailablePosition]);
 
+  // Listen for 'open-curriculum' event from terminal to open the Curriculum window
+  useEffect(() => {
+    const handleOpenCurriculum = () => {
+      const curriculumContent = contents?.find(c => c.metadata.title === 'Curriculum');
+      if (curriculumContent) {
+        create({
+          content: <curriculumContent.Component />,
+          title: 'Curriculum'
+        });
+      }
+    };
+    windowEvents.on('open-curriculum', handleOpenCurriculum);
+    return () => windowEvents.off('open-curriculum', handleOpenCurriculum);
+  }, [contents, create]);
+
   // All icons combined
   const allIcons = useMemo(() => {
     const fsFolderIds = new Set(filesystemFolders.map(f => f.id));

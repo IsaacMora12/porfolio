@@ -15,6 +15,7 @@ export interface FileNode extends FileSystemNode {
   type: 'text' | 'json' | 'image';
   content: string;
   extension: string;
+  readOnly?: boolean;
 }
 
 export interface FolderNode extends FileSystemNode {
