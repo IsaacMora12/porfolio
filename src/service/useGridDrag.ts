@@ -71,5 +71,5 @@ export function useGridDrag<T extends HTMLElement>({ id, onDrop, gridCellSize, r
     [handleMouseMove, handleMouseUp]
   );
 
-  return { handleDragStart, dragPosition, isDragging: isDraggingRef.current };
+  return { handleDragStart, dragPosition, isDragging: isDraggingRef, isDraggingRef };
 }
