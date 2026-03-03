@@ -142,6 +142,51 @@ export class FileSystemService {
     this.items.set(projectFileId, projectFile);
     sampleFolder.children.push(projectFileId);
 
+    // Create curriculum file on Desktop
+    const curriculumFileId = generateId();
+    const curriculumFile: FileNode = {
+      id: curriculumFileId,
+      name: 'curriculum.txt',
+      type: 'text',
+      parentId: desktopId,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      content: [
+        '============================================',
+        '          ISAAC MORA\'S CODEX',
+        '============================================',
+        '',
+        'Frontend Web Developer with knowledge in backend and DevOps',
+        'Creating unique and functional web experiences',
+        '',
+        '--- ABOUT ME ---',
+        'I am a web developer passionate about creating innovative solutions.',
+        'With experience in frontend, backend, and DevOps, I enjoy facing',
+        'challenges and learning new technologies to improve my skills.',
+        '',
+        '--- EXPERIENCE ---',
+        'Junior Web Developer',
+        'Datawavelabs - 2023 - Present',
+        '  - Development of reusable and scalable front-end components',
+        '  - Design and development of RESTful back-ends using Django',
+        '  - Integration of external APIs',
+        '  - Creation of CI/CD pipelines with GitHub Actions',
+        '  - Data analysis and creation of visualizations',
+        '',
+        '--- TECHNOLOGIES ---',
+        'React, TypeScript, JavaScript, Python, Django, Docker,',
+        'GitHub Actions, Tailwind CSS, Node.js, Vite',
+        '',
+        '--- CONTACT ---',
+        'Email: Isaacmora12@gmail.com',
+        'GitHub: https://github.com/IsaacMora12',
+        '============================================',
+      ].join('\n'),
+      extension: 'txt',
+    };
+    this.items.set(curriculumFileId, curriculumFile);
+    desktop.children.push(curriculumFileId);
+
     // Set current folder to desktop
     this.currentFolderId = desktopId;
     this.currentPath = '/root/home/user/Desktop';
@@ -172,28 +217,9 @@ export class FileSystemService {
 
   // Load state from IndexedDB
   loadState(state: { items: Record<string, FileSystemItem>; currentFolderId: string; rootId: string }): void {
-    console.log('[FileSystem] loadState called');
-    console.log('[FileSystem] Loading items:', Object.keys(state.items).length);
-    console.log('[FileSystem] Loading currentFolderId:', state.currentFolderId);
-    console.log('[FileSystem] Loading rootId:', state.rootId);
-    
     this.items = new Map(Object.entries(state.items));
     this.currentFolderId = state.currentFolderId;
     this.rootId = state.rootId;
-    
-    console.log('[FileSystem] After loadState - items size:', this.items.size);
-    console.log('[FileSystem] After loadState - currentFolderId:', this.currentFolderId);
-    
-    // Verify the current folder exists
-    const currentFolder = this.items.get(this.currentFolderId);
-    if (currentFolder && currentFolder.type === 'folder') {
-      const folder = currentFolder as FolderNode;
-      console.log('[FileSystem] Current folder found:', folder.name, folder.type);
-      console.log('[FileSystem] Current folder children:', folder.children);
-    } else {
-      console.log('[FileSystem] Current folder not found or is not a folder');
-    }
-    
     this.notify();
   }
 
@@ -219,17 +245,12 @@ export class FileSystemService {
 
   // Resolve path to node ID
   resolvePath(path: string): PathResult {
-    console.log('[FileSystem] resolvePath called with:', path);
-    console.log('[FileSystem] resolvePath rootId:', this.rootId);
-    
     if (path === '/' || path === '~') {
-      console.log('[FileSystem] resolvePath: returning root');
       return { nodeId: this.rootId, path: '/' };
     }
 
     // Handle absolute paths
     let currentId = path.startsWith('/') ? this.rootId : this.currentFolderId;
-    console.log('[FileSystem] resolvePath starting currentId:', currentId);
     
     // Handle ~ prefix
     if (path.startsWith('~')) {
@@ -239,17 +260,14 @@ export class FileSystemService {
 
     // Handle .. and .
     let parts = path.split('/').filter(p => p && p !== '.');
-    console.log('[FileSystem] resolvePath parts:', parts);
 
     // If first part matches root folder name, skip it (path starts from root anyway)
     const rootNode = this.items.get(this.rootId);
     if (rootNode && parts[0] === rootNode.name) {
       parts = parts.slice(1);
-      console.log('[FileSystem] resolvePath skipped root name, new parts:', parts);
     }
     
     for (const part of parts) {
-      console.log('[FileSystem] resolvePath looking for:', part, 'in folder:', currentId);
       if (part === '..') {
         const current = this.items.get(currentId);
         if (current?.parentId) {
@@ -264,9 +282,7 @@ export class FileSystemService {
           });
           if (childId) {
             currentId = childId;
-            console.log('[FileSystem] resolvePath found:', childId);
           } else {
-            console.log('[FileSystem] resolvePath: child not found, returning null');
             return { nodeId: null, path: this.getPath(currentId) };
           }
         }
@@ -278,23 +294,14 @@ export class FileSystemService {
 
   // List contents of current folder directly (bypasses path resolution)
   lsDirect(): FileSystemItem[] {
-    console.log('[FileSystem] lsDirect called, currentFolderId:', this.currentFolderId);
     const folder = this.items.get(this.currentFolderId);
-    console.log('[FileSystem] lsDirect folder:', folder?.name);
-    
     if (!folder || folder.type !== 'folder') {
-      console.log('[FileSystem] lsDirect: not a folder');
       return [];
     }
-    
     const folderNode = folder as FolderNode;
-    console.log('[FileSystem] lsDirect children:', folderNode.children);
-    
-    const items = folderNode.children
+    return folderNode.children
       .map(id => this.items.get(id))
       .filter((item): item is FileSystemItem => item !== undefined);
-    console.log('[FileSystem] lsDirect items:', items.length);
-    return items;
   }
 
   // Get folders in current directory (for desktop icons)
@@ -537,12 +544,8 @@ export class FileSystemService {
 
   // Create a new folder
   mkdir(name: string): OperationResult {
-    console.log('[FileSystem] mkdir called with name:', name);
-    console.log('[FileSystem] currentFolderId:', this.currentFolderId);
-    
     const parent = this.items.get(this.currentFolderId) as FolderNode;
     if (!parent || parent.type !== 'folder') {
-      console.log('[FileSystem] Error: parent is invalid');
       return { success: false, message: 'mkdir: current directory is invalid' };
     }
 
@@ -569,8 +572,6 @@ export class FileSystemService {
 
     this.items.set(id, folder);
     parent.children.push(id);
-    console.log('[FileSystem] Folder created, parent.children now:', parent.children);
-    console.log('[FileSystem] Total items in system:', this.items.size);
     this.notify();
     
     return { success: true, message: '', data: { id, name, type: 'folder' } };

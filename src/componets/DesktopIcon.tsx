@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useCallback } from 'react';
 import type { IconState, IconPosition } from '../domain/icon/types';
 import { useGridDrag } from '../service/useGridDrag';
 
@@ -10,13 +10,34 @@ interface DesktopIconProps extends IconState {
 const DesktopIcon: React.FC<DesktopIconProps> = (props) => {
   const { id, title, position, onDrop, gridCellSize, action, iconLogo } = props;
   const ref = useRef<HTMLDivElement>(null);
+  const wasDraggingRef = useRef(false);
+
+  const wrappedOnDrop = useCallback((dropId: string, pos: IconPosition) => {
+    wasDraggingRef.current = true;
+    onDrop(dropId, pos);
+  }, [onDrop]);
 
   const { handleDragStart, dragPosition, isDraggingRef } = useGridDrag<HTMLDivElement>({
     id,
-    onDrop,
+    onDrop: wrappedOnDrop,
     gridCellSize,
     ref,
   });
+
+  const handleDoubleClick = useCallback(() => {
+    // Only open if we weren't just dragging
+    if (!wasDraggingRef.current) {
+      action();
+    }
+    wasDraggingRef.current = false;
+  }, [action]);
+
+  const handleMouseUp = useCallback(() => {
+    // Reset drag flag after a short delay
+    setTimeout(() => {
+      wasDraggingRef.current = false;
+    }, 200);
+  }, []);
 
   const style: React.CSSProperties = {
     width: gridCellSize.width,
@@ -65,12 +86,7 @@ const DesktopIcon: React.FC<DesktopIconProps> = (props) => {
   };
 
   return (
-    <div ref={ref} style={style} onMouseDown={handleDragStart} onMouseUp={(e) => {
-      // Only trigger action if not dragging
-      if (!isDraggingRef.current) {
-        action();
-      }
-    }}>
+    <div ref={ref} style={style} onMouseDown={handleDragStart} onMouseUp={handleMouseUp} onDoubleClick={handleDoubleClick}>
       <div className="flex flex-col items-center justify-center p-2">
         <span className="text-4xl">
           {getIcon()}

@@ -40,13 +40,11 @@ export class TerminalService {
       name: 'ls',
       description: 'List directory contents (flat or tree format)',
       execute: (args) => {
-        console.log('[TerminalService] ls executing with args:', args);
         const showAll = args.includes('-a') || args.includes('-la') || args.includes('-al');
         const treeFormat = args.includes('-t') || args.includes('--tree');
         
         // Get items directly from current folder (bypasses path resolution)
         const items = fileSystemService.lsDirect();
-        console.log('[TerminalService] ls items returned:', items.length);
         const filteredItems = showAll ? items : items.filter(item => !item.name.startsWith('.'));
         
         if (filteredItems.length === 0) {
@@ -128,12 +126,10 @@ export class TerminalService {
       name: 'mkdir',
       description: 'Create directory',
       execute: (args) => {
-        console.log('[TerminalService] mkdir executing with args:', args);
         if (!args[0]) {
           return 'mkdir: missing operand';
         }
         const result = fileSystemService.mkdir(args[0]);
-        console.log('[TerminalService] mkdir result:', result);
         return result.success ? '' : result.message;
       },
     },

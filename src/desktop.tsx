@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import WindowComponent from './componets/window';
 import { useWindowManager } from './domain/window/useWindowManager';
 import DesktopGrid from './componets/DesktopGrid';
@@ -10,41 +10,35 @@ import { windowEvents } from './domain/window/WindowEvents';
 import type { IconPosition, IconState } from './domain/icon/types';
 import type { FileSystemState } from './domain/filesystem/types';
 
-// Helper function to get icon name based on file extension
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getFileIconName(_extension?: string): string {
-  // For now, use default file icon for all files
-  // DesktopIcon only supports: terminal, explorer, folder, and default
-  return 'file';
-}
-
 function Desktop() {
   const { windows, create, bringToFront, move, resize, close, minimize, toggleMaximize } = useWindowManager();
   const { contents } = useContent();
   const [desktopIcons, setDesktopIcons] = useState<IconState[]>([]);
   const [isBooting, setIsBooting] = useState(true);
   const [filesystemFolders, setFilesystemFolders] = useState<IconState[]>([]);
+  const [fsReady, setFsReady] = useState(false);
+
+  // Store saved icon positions in a ref so it persists across renders
+  const savedPositionsRef = useRef<Record<string, IconPosition>>({});
 
   // Load filesystem from IndexedDB on mount
   useEffect(() => {
     const loadFilesystem = async () => {
       try {
-        console.log('[Desktop] Initializing IndexedDB...');
         await indexedDBService.init();
-        console.log('[Desktop] Loading filesystem from DB...');
         const savedState = await indexedDBService.load<FileSystemState>('filesystem');
-        console.log('[Desktop] Saved state found:', savedState ? 'yes' : 'no');
         if (savedState) {
-          console.log('[Desktop] Root ID in saved state:', savedState.rootId);
-          console.log('[Desktop] Current folder ID in saved state:', savedState.currentFolderId);
-          console.log('[Desktop] Items count in saved state:', Object.keys(savedState.items).length);
           fileSystemService.loadState(savedState);
-          console.log('[Desktop] State loaded successfully');
-        } else {
-          console.log('[Desktop] No saved state, using default initialization');
         }
+        // Load saved icon positions
+        const savedPositions = await indexedDBService.load<Record<string, IconPosition>>('iconPositions');
+        if (savedPositions) {
+          savedPositionsRef.current = savedPositions;
+        }
+        setFsReady(true);
       } catch (error) {
         console.error('[Desktop] Failed to load filesystem:', error);
+        setFsReady(true);
       }
     };
     loadFilesystem();
@@ -59,50 +53,62 @@ function Desktop() {
       } catch (error) {
         console.error('Failed to save filesystem:', error);
       }
-      updateFilesystemFolders();
     });
     return unsubscribe;
   }, []);
 
-  // Update filesystem folders for desktop
-  const updateFilesystemFolders = () => {
-    // Always get items from Desktop folder, not current folder
-    const items = fileSystemService.getDesktopItems();
-    
-    // Get existing positions from ALL icons to avoid overlap
-    const existingPositions = new Set(
-      [...desktopIcons, ...filesystemFolders].map(icon => `${icon.position.col},${icon.position.row}`)
+  // Helper: get all currently occupied positions from a list of icons
+  const getOccupiedPositions = useCallback((icons: IconState[], excludeId?: string): Set<string> => {
+    return new Set(
+      icons
+        .filter(icon => icon.id !== excludeId)
+        .map(icon => `${icon.position.col},${icon.position.row}`)
     );
-    
-    // Find first available position
-    const findNextAvailable = (): { col: number; row: number } => {
-      let col = 0;
-      let row = 0;
-      const maxCols = 8;
-      
-      while (existingPositions.has(`${col},${row}`)) {
-        col++;
-        if (col >= maxCols) {
-          col = 0;
-          row++;
-        }
+  }, []);
+
+  // Helper: find next available grid position
+  const findNextAvailablePosition = useCallback((occupied: Set<string>, startCol = 0, startRow = 0): IconPosition => {
+    const maxCols = 8;
+    let col = startCol;
+    let row = startRow;
+    while (occupied.has(`${col},${row}`)) {
+      col++;
+      if (col >= maxCols) {
+        col = 0;
+        row++;
       }
-      
-      existingPositions.add(`${col},${row}`);
-      return { col, row };
-    };
-    
+    }
+    return { col, row };
+  }, []);
+
+  // Build filesystem icons from Desktop folder items
+  // This is stable: it uses saved positions from IndexedDB when available
+  const buildFilesystemIcons = useCallback((existingSystemIcons: IconState[]): IconState[] => {
+    const items = fileSystemService.getDesktopItems();
+    const occupied = getOccupiedPositions(existingSystemIcons);
+
     const folderIcons: IconState[] = items.map((item) => {
-      const position = findNextAvailable();
+      const iconId = `fs-${item.type}-${item.id}`;
+
+      // Use saved position if available, otherwise find a new one
+      let position: IconPosition;
+      if (savedPositionsRef.current[iconId]) {
+        position = savedPositionsRef.current[iconId];
+      } else {
+        position = findNextAvailablePosition(occupied);
+        // Save the assigned position
+        savedPositionsRef.current[iconId] = position;
+      }
+      occupied.add(`${position.col},${position.row}`);
+
       return {
-        id: `fs-${item.type}-${item.id}`,
+        id: iconId,
         title: item.name,
         position,
-        iconLogo: item.type === 'folder' ? 'folder' : getFileIconName(item.extension),
+        iconLogo: item.type === 'folder' ? 'folder' : 'file',
         content: null,
         action: () => {
           if (item.type === 'folder') {
-            // Navigate to folder in File Explorer
             fileSystemService.navigateToFolder(item.id);
             const explorerContent = contents?.find(c => c.metadata.title === 'File Explorer');
             if (explorerContent) {
@@ -112,14 +118,12 @@ function Desktop() {
               });
             }
           } else {
-            // Open file with nano - emit event after Terminal is created
             const terminalContent = contents?.find(c => c.metadata.title === 'Terminal');
             if (terminalContent) {
               create({
                 content: <terminalContent.Component />,
                 title: 'Terminal'
               });
-              // Emit event after a small delay to ensure Terminal is mounted
               setTimeout(() => {
                 windowEvents.emit('open-nano', { name: item.name, id: item.id });
               }, 100);
@@ -128,202 +132,226 @@ function Desktop() {
         },
       };
     });
-    setFilesystemFolders(folderIcons);
-  };
 
-  useEffect(() => {
-    if (contents && Array.isArray(contents)) {
-      const ICONS_PER_ROW = 8;
-      const initialIcons = contents.map((item, index) => {
-        if (!item || !item.metadata) {
-          
-          return null;
-        }
-        
-        // Skip Terminal and File Explorer as they are handled as system icons
-        if (item.metadata.title === 'Terminal' || item.metadata.title === 'File Explorer') {
-          return null;
-        }
-        
-        const col = index % ICONS_PER_ROW;
-        const row = Math.floor(index / ICONS_PER_ROW);
-        return {
-          id: `icon-${index}`,
-          title: item.metadata.title || 'Untitled',
-          position: { col, row },
-          iconLogo: item.metadata.icon || '',
-          action: () => {
-            
-            create({
-              content: <item.Component />,
-              title: item.metadata.title || 'Untitled'
-            });
-          },
-        };
-      }).filter(Boolean) as IconState[];
-      setDesktopIcons(initialIcons);
-    }
-  }, [contents, create]);
+    return folderIcons;
+  }, [contents, create, getOccupiedPositions, findNextAvailablePosition]);
 
-  // Add terminal and explorer icons to desktop
+  // Initialize all icons once filesystem and contents are ready
   useEffect(() => {
+    if (!fsReady || !contents || !Array.isArray(contents)) return;
+
+    // 1. Build system icons (Terminal, File Explorer) with fixed positions
     const systemIcons: IconState[] = [
       {
         id: 'terminal-icon',
         title: 'Terminal',
-        position: { col: 0, row: 0 },
+        position: savedPositionsRef.current['terminal-icon'] || { col: 0, row: 0 },
         iconLogo: 'terminal',
         content: null,
         action: () => {
-          const terminalContent = contents?.find(c => c.metadata.title === 'Terminal');
+          const terminalContent = contents.find(c => c.metadata.title === 'Terminal');
           if (terminalContent) {
-            create({
-              content: <terminalContent.Component />,
-              title: 'Terminal'
-            });
+            create({ content: <terminalContent.Component />, title: 'Terminal' });
           }
         },
       },
       {
         id: 'explorer-icon',
         title: 'File Explorer',
-        position: { col: 1, row: 0 },
+        position: savedPositionsRef.current['explorer-icon'] || { col: 1, row: 0 },
         iconLogo: 'explorer',
         content: null,
         action: () => {
-          const explorerContent = contents?.find(c => c.metadata.title === 'File Explorer');
+          const explorerContent = contents.find(c => c.metadata.title === 'File Explorer');
           if (explorerContent) {
-            create({
-              content: <explorerContent.Component />,
-              title: 'File Explorer'
-            });
+            create({ content: <explorerContent.Component />, title: 'File Explorer' });
           }
         },
       },
     ];
-    setDesktopIcons(prev => {
-      // Filter out system icons that might already exist
-      const filtered = prev.filter(icon => icon.id !== 'terminal-icon' && icon.id !== 'explorer-icon');
-      return [...systemIcons, ...filtered];
-    });
-  }, [contents]);
 
-  // Find next available position
-  const findAvailablePosition = (startCol: number, startRow: number): IconPosition => {
-    const occupiedPositions = new Set(
-      allIcons.map(icon => `${icon.position.col},${icon.position.row}`)
-    );
+    // 2. Build content icons (Curriculum etc.), skipping Terminal, File Explorer, Nano
+    const skipTitles = new Set(['Terminal', 'File Explorer', 'Nano']);
+    const occupied = getOccupiedPositions(systemIcons);
+    const contentIcons: IconState[] = [];
     
-    let col = startCol;
-    let row = startRow;
-    const maxCols = 8;
-    
-    while (occupiedPositions.has(`${col},${row}`)) {
-      col++;
-      if (col >= maxCols) {
-        col = 0;
-        row++;
+    contents.forEach((item, index) => {
+      if (!item?.metadata || skipTitles.has(item.metadata.title)) return;
+      const iconId = `icon-${index}`;
+      let position: IconPosition;
+      if (savedPositionsRef.current[iconId]) {
+        position = savedPositionsRef.current[iconId];
+      } else {
+        position = findNextAvailablePosition(occupied);
+        savedPositionsRef.current[iconId] = position;
       }
-    }
-    
-    return { col, row };
-  };
+      occupied.add(`${position.col},${position.row}`);
 
-  const handleIconDrop = (id: string, position: IconPosition) => {
-    // Extract item type and original ID from the icon ID
-    const parts = id.split('-');
-    const itemId = parts.slice(2).join('-');
-    
-    // Check if dropped on a folder
-    const targetIcon = allIcons.find(icon => {
-      const iconParts = icon.id.split('-');
-      const iconType = iconParts[1];
-      const iconPos = icon.position;
-      return iconType === 'folder' && iconPos.col === position.col && iconPos.row === position.row && icon.id !== id;
+      contentIcons.push({
+        id: iconId,
+        title: item.metadata.title || 'Untitled',
+        position,
+        iconLogo: item.metadata.icon || '',
+        content: null,
+        action: () => {
+          create({
+            content: <item.Component />,
+            title: item.metadata.title || 'Untitled'
+          });
+        },
+      });
     });
-    
-    if (targetIcon) {
-      // Extract folder ID from target icon
-      const targetParts = targetIcon.id.split('-');
-      const targetFolderId = targetParts.slice(2).join('-');
-      
-      // Move item to folder
-      fileSystemService.moveToFolder(itemId, targetFolderId);
-    } else {
-      // Check if position is available, find new position if not
-      const occupiedPositions = new Set(
-        allIcons.filter(icon => icon.id !== id).map(icon => `${icon.position.col},${icon.position.row}`)
-      );
-      
-      let finalPosition = position;
-      if (occupiedPositions.has(`${position.col},${position.row}`)) {
-        finalPosition = findAvailablePosition(position.col, position.row);
-      }
-      
-      // Update position in both state variables
-      setDesktopIcons(prevIcons =>
-        prevIcons.map(icon =>
-          icon.id === id ? { ...icon, position: finalPosition } : icon
-        )
-      );
-      setFilesystemFolders(prevIcons =>
-        prevIcons.map(icon =>
-          icon.id === id ? { ...icon, position: finalPosition } : icon
-        )
-      );
-      
-      // Save position to IndexedDB
-      saveIconPosition(id, finalPosition);
-    }
-  };
 
-  // Save icon position to IndexedDB
-  const saveIconPosition = async (iconId: string, position: IconPosition) => {
-    try {
-      const savedPositions = await indexedDBService.load<Record<string, IconPosition>>('iconPositions') || {};
-      savedPositions[iconId] = position;
-      await indexedDBService.save('iconPositions', savedPositions);
-    } catch (error) {
-      console.error('Failed to save icon position:', error);
-    }
-  };
+    setDesktopIcons([...systemIcons, ...contentIcons]);
 
-  // Load saved icon positions
+    // 3. Build filesystem icons
+    const allSystemAndContent = [...systemIcons, ...contentIcons];
+    const fsIcons = buildFilesystemIcons(allSystemAndContent);
+    setFilesystemFolders(fsIcons);
+
+    // Persist any new positions
+    indexedDBService.save('iconPositions', savedPositionsRef.current).catch(() => {});
+  }, [fsReady, contents, create, getOccupiedPositions, findNextAvailablePosition, buildFilesystemIcons]);
+
+  // Subscribe to filesystem changes to update filesystem folder icons
+  // This only adds/removes icons, it does NOT recalculate existing positions
   useEffect(() => {
-    const loadPositions = async () => {
-      try {
-        const savedPositions = await indexedDBService.load<Record<string, IconPosition>>('iconPositions');
-        if (savedPositions) {
-          setDesktopIcons(prev => prev.map(icon => {
-            if (savedPositions[icon.id]) {
-              return { ...icon, position: savedPositions[icon.id] };
-            }
-            return icon;
-          }));
-          setFilesystemFolders(prev => prev.map(icon => {
-            if (savedPositions[icon.id]) {
-              return { ...icon, position: savedPositions[icon.id] };
-            }
-            return icon;
-          }));
+    if (!fsReady) return;
+
+    const unsubscribe = fileSystemService.subscribe(() => {
+      setFilesystemFolders(prev => {
+        const items = fileSystemService.getDesktopItems();
+        const newItemIds = new Set(items.map(i => `fs-${i.type}-${i.id}`));
+        const prevIds = new Set(prev.map(i => i.id));
+
+        // Keep existing icons that still exist (preserve positions)
+        const kept = prev.filter(icon => newItemIds.has(icon.id));
+
+        // Add new items only
+        const newItems = items.filter(i => !prevIds.has(`fs-${i.type}-${i.id}`));
+        if (newItems.length === 0 && kept.length === prev.length) {
+          // Nothing changed in desktop items
+          return kept.length !== prev.length ? kept : prev;
         }
-      } catch (error) {
-        console.error('Failed to load icon positions:', error);
-      }
-    };
-    loadPositions();
-  }, []);
 
-  const openWindows = useMemo(() => windows.filter((w) => w.isOpen), [windows]);
+        // Calculate occupied positions for placing new items
+        const allCurrentIcons = [...desktopIcons, ...kept];
+        const occupied = getOccupiedPositions(allCurrentIcons);
 
+        const addedIcons: IconState[] = newItems.map((item) => {
+          const iconId = `fs-${item.type}-${item.id}`;
+          let position: IconPosition;
+          if (savedPositionsRef.current[iconId]) {
+            position = savedPositionsRef.current[iconId];
+          } else {
+            position = findNextAvailablePosition(occupied);
+            savedPositionsRef.current[iconId] = position;
+          }
+          occupied.add(`${position.col},${position.row}`);
+
+          return {
+            id: iconId,
+            title: item.name,
+            position,
+            iconLogo: item.type === 'folder' ? 'folder' : 'file',
+            content: null,
+            action: () => {
+              if (item.type === 'folder') {
+                fileSystemService.navigateToFolder(item.id);
+                const explorerContent = contents?.find(c => c.metadata.title === 'File Explorer');
+                if (explorerContent) {
+                  create({
+                    content: <explorerContent.Component />,
+                    title: 'File Explorer'
+                  });
+                }
+              } else {
+                const terminalContent = contents?.find(c => c.metadata.title === 'Terminal');
+                if (terminalContent) {
+                  create({
+                    content: <terminalContent.Component />,
+                    title: 'Terminal'
+                  });
+                  setTimeout(() => {
+                    windowEvents.emit('open-nano', { name: item.name, id: item.id });
+                  }, 100);
+                }
+              }
+            },
+          };
+        });
+
+        // Persist new positions
+        if (addedIcons.length > 0) {
+          indexedDBService.save('iconPositions', savedPositionsRef.current).catch(() => {});
+        }
+
+        return [...kept, ...addedIcons];
+      });
+    });
+    return unsubscribe;
+  }, [fsReady, desktopIcons, contents, create, getOccupiedPositions, findNextAvailablePosition]);
+
+  // All icons combined
   const allIcons = useMemo(() => {
-    // Merge filesystem folders with desktop icons
     const fsFolderIds = new Set(filesystemFolders.map(f => f.id));
     const filteredDesktopIcons = desktopIcons.filter(icon => !fsFolderIds.has(icon.id));
     return [...filteredDesktopIcons, ...filesystemFolders];
   }, [desktopIcons, filesystemFolders]);
 
-  // Show boot screen until data is ready or minimum 3 seconds have passed
+  const handleIconDrop = useCallback((id: string, position: IconPosition) => {
+    // Check if dropped on a folder (for drag-into-folder)
+    const targetIcon = allIcons.find(icon => {
+      const iconParts = icon.id.split('-');
+      const iconType = iconParts[1];
+      return iconType === 'folder' && icon.position.col === position.col && icon.position.row === position.row && icon.id !== id;
+    });
+
+    if (targetIcon) {
+      const parts = id.split('-');
+      const itemId = parts.slice(2).join('-');
+      const targetParts = targetIcon.id.split('-');
+      const targetFolderId = targetParts.slice(2).join('-');
+      fileSystemService.moveToFolder(itemId, targetFolderId);
+      return;
+    }
+
+    // Check if the target position is already occupied by another icon
+    const isOccupied = allIcons.some(
+      icon => icon.id !== id && icon.position.col === position.col && icon.position.row === position.row
+    );
+
+    if (isOccupied) {
+      // Don't move - position is taken
+      return;
+    }
+
+    // Clamp to valid grid bounds
+    const finalPosition: IconPosition = {
+      col: Math.max(0, position.col),
+      row: Math.max(0, position.row),
+    };
+
+    // Update position in state
+    setDesktopIcons(prevIcons =>
+      prevIcons.map(icon =>
+        icon.id === id ? { ...icon, position: finalPosition } : icon
+      )
+    );
+    setFilesystemFolders(prevIcons =>
+      prevIcons.map(icon =>
+        icon.id === id ? { ...icon, position: finalPosition } : icon
+      )
+    );
+
+    // Save position
+    savedPositionsRef.current[id] = finalPosition;
+    indexedDBService.save('iconPositions', savedPositionsRef.current).catch(() => {});
+  }, [allIcons]);
+
+  const openWindows = useMemo(() => windows.filter((w) => w.isOpen), [windows]);
+
+  // Show boot screen
   if (isBooting) {
     return <BootScreen onBootComplete={() => setIsBooting(false)} minDuration={3000} />;
   }
@@ -371,8 +399,8 @@ function Desktop() {
           </WindowComponent>
         ))}
       </div>
-     {// Taskbar
-     }
+
+      {/* Taskbar */}
       <div className="fixed bottom-0 left-0 right-0 h-12 bg-black backdrop-blur border-t border-oldgreen border-dashed flex items-center gap-2 px-3">
         <div className="flex items-center gap-2 overflow-x-auto">
           {openWindows.map((w) => (
