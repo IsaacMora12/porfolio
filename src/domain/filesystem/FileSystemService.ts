@@ -440,8 +440,15 @@ export class FileSystemService {
     // Start from root
     let currentId = this.rootId;
     
+    // Skip the first segment if it matches the root folder name (e.g. 'root')
+    // since we already start at rootId
+    const rootNode = this.items.get(this.rootId);
+    const segments = (rootNode && path.length > 0 && path[0] === rootNode.name)
+      ? path.slice(1)
+      : path;
+    
     // Navigate to the target folder
-    for (const part of path) {
+    for (const part of segments) {
       const current = this.items.get(currentId);
       if (!current || current.type !== 'folder') return [];
       

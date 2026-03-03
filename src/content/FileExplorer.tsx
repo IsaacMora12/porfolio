@@ -23,10 +23,10 @@ export default function FileExplorer() {
     setItems(folderItems);
   }, [currentPath]);
 
-  // Load items when component mounts
+  // Load items when component mounts or path changes
   useEffect(() => {
     loadItems();
-  }, []);
+  }, [loadItems]);
 
   // Subscribe to file system changes
   useEffect(() => {
