@@ -264,12 +264,7 @@ export class TerminalService {
           }
           return `\x1b[31mopen: ${fileName}: No such file or directory\x1b[0m`;
         }
-        // Special handling for curriculum
-        if (fileName === 'curriculum.txt') {
-          windowEvents.emit('open-curriculum');
-          return `Opening ${fileName}...`;
-        }
-        // For other files, open in nano (if not read-only) or display with cat
+        // For files, open in nano (if not read-only) or display with cat
         if (fileSystemService.isFileReadOnly(fileName)) {
           const result = fileSystemService.cat(fileName);
           return result.success ? result.message : `\x1b[31m${result.message}\x1b[0m`;
@@ -365,14 +360,7 @@ export class TerminalService {
         const file = items.find(item => item.name === fileName && item.type !== 'folder');
         
         if (file) {
-          // If the file is curriculum.txt, open the Curriculum window
-          if (fileName === 'curriculum.txt') {
-            windowEvents.emit('open-curriculum');
-            return [
-              { type: 'output', content: `Opening ${fileName}...` }
-            ];
-          }
-          // For other files, display content like cat
+          // Display file content like cat
           const result = fileSystemService.cat(fileName);
           if (result.success) {
             return [

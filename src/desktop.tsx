@@ -303,18 +303,6 @@ function Desktop() {
     const handleOpenFile = (data: unknown) => {
       const { id, name } = data as { id: string; name: string };
 
-      // Special case: curriculum.txt opens the rich Curriculum component
-      if (name === 'curriculum.txt') {
-        const curriculumContent = contents?.find(c => c.metadata.title === 'Curriculum');
-        if (curriculumContent) {
-          create({
-            content: <curriculumContent.Component />,
-            title: 'Curriculum'
-          });
-        }
-        return;
-      }
-
       // Check if the file is read-only
       const item = fileSystemService.getItemById(id);
       const isReadOnly = item && item.type !== 'folder' && (item as any).readOnly;

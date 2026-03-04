@@ -142,52 +142,6 @@ export class FileSystemService {
     this.items.set(projectFileId, projectFile);
     sampleFolder.children.push(projectFileId);
 
-    // Create curriculum file on Desktop
-    const curriculumFileId = generateId();
-    const curriculumFile: FileNode = {
-      id: curriculumFileId,
-      name: 'curriculum.txt',
-      type: 'text',
-      parentId: desktopId,
-      createdAt: Date.now(),
-      updatedAt: Date.now(),
-      readOnly: true,
-      content: [
-        '============================================',
-        '          ISAAC MORA\'S CODEX',
-        '============================================',
-        '',
-        'Frontend Web Developer with knowledge in backend and DevOps',
-        'Creating unique and functional web experiences',
-        '',
-        '--- ABOUT ME ---',
-        'I am a web developer passionate about creating innovative solutions.',
-        'With experience in frontend, backend, and DevOps, I enjoy facing',
-        'challenges and learning new technologies to improve my skills.',
-        '',
-        '--- EXPERIENCE ---',
-        'Junior Web Developer',
-        'Datawavelabs - 2023 - Present',
-        '  - Development of reusable and scalable front-end components',
-        '  - Design and development of RESTful back-ends using Django',
-        '  - Integration of external APIs',
-        '  - Creation of CI/CD pipelines with GitHub Actions',
-        '  - Data analysis and creation of visualizations',
-        '',
-        '--- TECHNOLOGIES ---',
-        'React, TypeScript, JavaScript, Python, Django, Docker,',
-        'GitHub Actions, Tailwind CSS, Node.js, Vite',
-        '',
-        '--- CONTACT ---',
-        'Email: Isaacmora12@gmail.com',
-        'GitHub: https://github.com/IsaacMora12',
-        '============================================',
-      ].join('\n'),
-      extension: 'txt',
-    };
-    this.items.set(curriculumFileId, curriculumFile);
-    desktop.children.push(curriculumFileId);
-
     // Set current folder to desktop
     this.currentFolderId = desktopId;
     this.currentPath = '/root/home/user/Desktop';
