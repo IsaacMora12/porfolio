@@ -10,7 +10,6 @@ export interface TerminalLine {
 export class TerminalService {
   private history: string[] = [];
   private historyIndex: number = -1;
-  private currentInput: string = '';
   
   private commands: TerminalCommand[] = [
     {
@@ -40,13 +39,11 @@ export class TerminalService {
       name: 'ls',
       description: 'List directory contents (flat or tree format)',
       execute: (args) => {
-        console.log('[TerminalService] ls executing with args:', args);
         const showAll = args.includes('-a') || args.includes('-la') || args.includes('-al');
         const treeFormat = args.includes('-t') || args.includes('--tree');
         
         // Get items directly from current folder (bypasses path resolution)
         const items = fileSystemService.lsDirect();
-        console.log('[TerminalService] ls items returned:', items.length);
         const filteredItems = showAll ? items : items.filter(item => !item.name.startsWith('.'));
         
         if (filteredItems.length === 0) {
@@ -128,12 +125,10 @@ export class TerminalService {
       name: 'mkdir',
       description: 'Create directory',
       execute: (args) => {
-        console.log('[TerminalService] mkdir executing with args:', args);
         if (!args[0]) {
           return 'mkdir: missing operand';
         }
         const result = fileSystemService.mkdir(args[0]);
-        console.log('[TerminalService] mkdir result:', result);
         return result.success ? '' : result.message;
       },
     },
@@ -226,6 +221,10 @@ export class TerminalService {
           return 'nano: missing operand. Usage: nano <filename>';
         }
         const fileName = args[0];
+        // Check if file is read-only
+        if (fileSystemService.isFileReadOnly(fileName)) {
+          return `\x1b[31mnano: ${fileName}: Read-only file (permission denied)\x1b[0m`;
+        }
         // Check if file exists
         const items = fileSystemService.lsDirect();
         const file = items.find(item => item.name === fileName && item.type !== 'folder');
@@ -244,6 +243,34 @@ export class TerminalService {
           windowEvents.emit('open-nano', fileName);
         }
         return `Opening nano editor for: ${fileName}`;
+      },
+    },
+    {
+      name: 'open',
+      description: 'Open a file in its associated application',
+      execute: (args) => {
+        if (!args[0]) {
+          return 'open: missing operand. Usage: open <filename>';
+        }
+        const fileName = args[0];
+        const items = fileSystemService.lsDirect();
+        const file = items.find(item => item.name === fileName && item.type !== 'folder');
+        if (!file) {
+          const folder = items.find(item => item.name === fileName && item.type === 'folder');
+          if (folder) {
+            fileSystemService.navigateToFolder(folder.id);
+            windowEvents.emit('open-file-explorer');
+            return `Opening folder: ${fileName}`;
+          }
+          return `\x1b[31mopen: ${fileName}: No such file or directory\x1b[0m`;
+        }
+        // For files, open in nano (if not read-only) or display with cat
+        if (fileSystemService.isFileReadOnly(fileName)) {
+          const result = fileSystemService.cat(fileName);
+          return result.success ? result.message : `\x1b[31m${result.message}\x1b[0m`;
+        }
+        windowEvents.emit('open-nano', { name: fileName, id: file.id });
+        return `Opening ${fileName} in editor...`;
       },
     },
     {
@@ -327,8 +354,31 @@ export class TerminalService {
 
     if (!command) {
       if (commandName) {
+        // Check if it's a file in the current directory (like typing ./file or filename)
+        const fileName = commandName.startsWith('./') ? commandName.slice(2) : commandName;
+        const items = fileSystemService.lsDirect();
+        const file = items.find(item => item.name === fileName && item.type !== 'folder');
+        
+        if (file) {
+          // Display file content like cat
+          const result = fileSystemService.cat(fileName);
+          if (result.success) {
+            return [
+              { type: 'output', content: result.message }
+            ];
+          }
+        }
+
+        // Check if it's a folder
+        const folder = items.find(item => item.name === fileName && item.type === 'folder');
+        if (folder) {
+          lines.push({ type: 'input', content: input });
+          lines.push({ type: 'error', content: `bash: ${commandName}: Is a directory` });
+          return lines;
+        }
+
         lines.push({ type: 'input', content: input });
-        lines.push({ type: 'error', content: `Command not found: ${commandName}` });
+        lines.push({ type: 'error', content: `Command not found: ${commandName}. Type "help" for available commands.` });
       }
       return lines;
     }

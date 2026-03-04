@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fileSystemService } from '../domain/filesystem/FileSystemService';
-import type { FileNode } from '../domain/filesystem/types';
+import { windowEvents } from '../domain/window/WindowEvents';
 
 interface ExplorerItem {
   id: string;
@@ -23,10 +23,10 @@ export default function FileExplorer() {
     setItems(folderItems);
   }, [currentPath]);
 
-  // Load items when component mounts
+  // Load items when component mounts or path changes
   useEffect(() => {
     loadItems();
-  }, []);
+  }, [loadItems]);
 
   // Subscribe to file system changes
   useEffect(() => {
@@ -40,6 +40,9 @@ export default function FileExplorer() {
     if (item.type === 'folder') {
       // Navigate locally without affecting FileSystemService
       setCurrentPath([...currentPath, item.name]);
+    } else {
+      // Open the file via event -- desktop.tsx will handle creating the window
+      windowEvents.emit('open-file-from-explorer', { id: item.id, name: item.name });
     }
   };
 
@@ -49,11 +52,6 @@ export default function FileExplorer() {
     } else if (currentPath.length === 1 && currentPath[0] !== 'root') {
       setCurrentPath(['root']);
     }
-  };
-
-  // Handle clicking on path breadcrumb
-  const handlePathClick = (index: number) => {
-    setCurrentPath(currentPath.slice(0, index + 1));
   };
 
   const getFileIcon = (item: ExplorerItem) => {
