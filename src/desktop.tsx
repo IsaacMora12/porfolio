@@ -7,6 +7,7 @@ import BootScreen from './componets/BootScreen';
 import { fileSystemService } from './domain/filesystem/FileSystemService';
 import { indexedDBService } from './service/IndexedDBService';
 import { windowEvents } from './domain/window/WindowEvents';
+import TextEditor from './content/TextEditor';
 import type { IconPosition, IconState } from './domain/icon/types';
 import type { FileSystemState } from './domain/filesystem/types';
 
@@ -118,16 +119,11 @@ function Desktop() {
               });
             }
           } else {
-            const terminalContent = contents?.find(c => c.metadata.title === 'Terminal');
-            if (terminalContent) {
-              create({
-                content: <terminalContent.Component />,
-                title: 'Terminal'
-              });
-              setTimeout(() => {
-                windowEvents.emit('open-nano', { name: item.name, id: item.id });
-              }, 100);
-            }
+            // Open file directly in Nano editor
+            create({
+              content: <TextEditor fileName={item.name} fileId={item.id} />,
+              title: `TextEditor - ${item.name}`
+            });
           }
         },
       };
@@ -191,7 +187,7 @@ function Desktop() {
         id: iconId,
         title: item.metadata.title || 'Untitled',
         position,
-        iconLogo: item.metadata.icon || '',
+        iconLogo: typeof item.metadata.icon === 'string' ? item.metadata.icon : undefined,
         content: null,
         action: () => {
           create({
@@ -266,16 +262,11 @@ function Desktop() {
                   });
                 }
               } else {
-                const terminalContent = contents?.find(c => c.metadata.title === 'Terminal');
-                if (terminalContent) {
-                  create({
-                    content: <terminalContent.Component />,
-                    title: 'Terminal'
-                  });
-                  setTimeout(() => {
-                    windowEvents.emit('open-nano', { name: item.name, id: item.id });
-                  }, 100);
-                }
+                // Open file directly in Nano editor
+                create({
+                  content: <TextEditor fileName={item.name} fileId={item.id} />,
+                  title: `TextEditor - ${item.name}`
+                });
               }
             },
           };
@@ -343,14 +334,64 @@ function Desktop() {
           title: name
         });
       } else {
-        // Open in Nano editor
-        windowEvents.emit('open-nano', { name, id });
+        // Open in TextEditor
+        windowEvents.emit('open-texteditor', { name, id });
       }
     };
 
     windowEvents.on('open-file-from-explorer', handleOpenFile);
     return () => windowEvents.off('open-file-from-explorer', handleOpenFile);
   }, [contents, create]);
+
+  // Listen for 'open-texteditor' event to open TextEditor directly
+  useEffect(() => {
+    const handleOpenNano = (fileInfo: unknown) => {
+      // Support both string (filename) and object {name, id}
+      let name: string;
+      let fileId: string | undefined;
+
+      if (typeof fileInfo === 'object' && fileInfo !== null) {
+        const info = fileInfo as { name: string; id?: string };
+        name = info.name;
+        fileId = info.id;
+      } else {
+        name = typeof fileInfo === 'string' ? fileInfo : 'untitled.txt';
+      }
+
+      // If we have a file ID, get the actual filename
+      if (fileId) {
+        const file = fileSystemService.getFileById(fileId);
+        if (file) {
+          name = file.name;
+        }
+      }
+
+      // Open Nano editor window with fileId for proper file lookup
+      create({
+        content: <TextEditor fileName={name} fileId={fileId} />,
+        title: `TextEditor - ${name}`
+      });
+    };
+
+    windowEvents.on('open-texteditor', handleOpenNano);
+    return () => windowEvents.off('open-texteditor', handleOpenNano);
+  }, [create]);
+
+  // Listen for 'close-texteditor' event to close TextEditor windows (when Ctrl+X is pressed)
+  useEffect(() => {
+    const handleCloseNano = () => {
+      // Find the most recently opened Nano window (highest zIndex)
+      const textEditorWindows = windows.filter(w => w.title?.startsWith('TextEditor -'));
+      if (textEditorWindows.length > 0) {
+        // Sort by zIndex descending and close the top one
+        const topTextEditorWindow = textEditorWindows.sort((a, b) => b.zIndex - a.zIndex)[0];
+        close(topTextEditorWindow.id);
+      }
+    };
+
+    windowEvents.on('close-texteditor', handleCloseNano);
+    return () => windowEvents.off('close-texteditor', handleCloseNano);
+  }, [windows, close]);
 
   // All icons combined
   const allIcons = useMemo(() => {

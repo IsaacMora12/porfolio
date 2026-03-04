@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { fileSystemService } from '../domain/filesystem/FileSystemService';
 import { windowEvents } from '../domain/window/WindowEvents';
-import type { FileNode } from '../domain/filesystem/types';
 
 interface ExplorerItem {
   id: string;
@@ -53,11 +52,6 @@ export default function FileExplorer() {
     } else if (currentPath.length === 1 && currentPath[0] !== 'root') {
       setCurrentPath(['root']);
     }
-  };
-
-  // Handle clicking on path breadcrumb
-  const handlePathClick = (index: number) => {
-    setCurrentPath(currentPath.slice(0, index + 1));
   };
 
   const getFileIcon = (item: ExplorerItem) => {

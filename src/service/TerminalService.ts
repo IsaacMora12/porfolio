@@ -10,7 +10,6 @@ export interface TerminalLine {
 export class TerminalService {
   private history: string[] = [];
   private historyIndex: number = -1;
-  private currentInput: string = '';
   
   private commands: TerminalCommand[] = [
     {

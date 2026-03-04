@@ -2,30 +2,48 @@ import { useState, useEffect, useRef } from 'react';
 import { fileSystemService } from '../domain/filesystem/FileSystemService';
 import { windowEvents } from '../domain/window/WindowEvents';
 
-interface NanoProps {
+interface TextEditorProps {
   fileName?: string;
+  fileId?: string;
   onClose?: () => void;
 }
 
-export default function Nano({ fileName, onClose }: NanoProps) {
+export default function TextEditor({ fileName, fileId, onClose }: TextEditorProps) {
   const [content, setContent] = useState('');
   const [lines, setLines] = useState<number[]>([1]);
   const [cursorLine, setCursorLine] = useState(0);
   const [cursorCol, setCursorCol] = useState(0);
   const [statusMessage, setStatusMessage] = useState('');
+  const [displayFileName, setDisplayFileName] = useState(fileName || 'Untitled');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Load file content if provided
+  // Load file content on mount
   useEffect(() => {
-    if (fileName) {
-      // Try to find the file in the filesystem
+    let loadedContent = '';
+    let loadedFileName = fileName || 'Untitled';
+
+    // If we have a file ID, try to get file by ID first
+    if (fileId) {
+      const file = fileSystemService.getFileById(fileId);
+      if (file) {
+        loadedContent = file.content || '';
+        loadedFileName = file.name;
+      }
+    } else if (fileName) {
+      // Otherwise find by name in current directory
       const items = fileSystemService.lsDirect();
       const file = items.find(item => item.name === fileName && item.type !== 'folder');
       if (file && 'content' in file) {
-        setContent(file.content || '');
+        loadedContent = file.content || '';
       }
     }
-  }, [fileName]);
+
+    setContent(loadedContent);
+    setDisplayFileName(loadedFileName);
+    
+    // Focus textarea after render
+    setTimeout(() => textareaRef.current?.focus(), 0);
+  }, [fileName, fileId]);
 
   // Update line numbers when content changes
   useEffect(() => {
@@ -35,9 +53,9 @@ export default function Nano({ fileName, onClose }: NanoProps) {
 
   // Handle cursor position
   const handleCursorMove = (text: string, position: number) => {
-    const lines = text.substring(0, position).split('\n');
-    setCursorLine(lines.length - 1);
-    setCursorCol(lines[lines.length - 1].length);
+    const textLines = text.substring(0, position).split('\n');
+    setCursorLine(textLines.length - 1);
+    setCursorCol(textLines[textLines.length - 1].length);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -62,49 +80,38 @@ export default function Nano({ fileName, onClose }: NanoProps) {
     // Ctrl+G to show help
     if (e.ctrlKey && e.key === 'g') {
       e.preventDefault();
-      setStatusMessage('Nano help: Ctrl+O save, Ctrl+X exit, Ctrl+G help');
+      setStatusMessage('TextEditor help: Ctrl+O save, Ctrl+X exit, Ctrl+G help');
+      setTimeout(() => setStatusMessage(''), 3000);
     }
     
     // Ctrl+O to save
     if (e.ctrlKey && e.key === 'o') {
       e.preventDefault();
-      if (fileName) {
-        saveFile();
-      } else {
-        setStatusMessage('No file name - use: nano <filename>');
-      }
+      saveFile();
     }
     
     // Ctrl+X to exit
     if (e.ctrlKey && e.key === 'x') {
       e.preventDefault();
-      // If there are unsaved changes, warn first
-      if (content) {
-        setStatusMessage('Save modified buffer (ANSWERING "No" WILL DESTROY CHANGES) ? ');
-        // For now, just close
-        if (onClose) {
-          onClose();
-        } else {
-          windowEvents.emit('close-nano');
-        }
+      if (onClose) {
+        onClose();
       } else {
-        if (onClose) {
-          onClose();
-        } else {
-          windowEvents.emit('close-nano');
-        }
+        windowEvents.emit('close-texteditor');
       }
     }
   };
 
   const saveFile = () => {
-    if (fileName) {
-      const result = fileSystemService.writeFile(fileName, content);
+    if (displayFileName && displayFileName !== 'Untitled') {
+      const result = fileSystemService.writeFile(displayFileName, content);
       if (result.success) {
-        setStatusMessage(`File "${fileName}" saved`);
+        setStatusMessage(`[${displayFileName}] File saved`);
+        setTimeout(() => setStatusMessage(''), 2000);
       } else {
         setStatusMessage(`Error: ${result.message}`);
       }
+    } else {
+      setStatusMessage('No file name specified');
     }
   };
 
@@ -119,18 +126,23 @@ export default function Nano({ fileName, onClose }: NanoProps) {
     handleCursorMove(content, textarea.selectionStart);
   };
 
+  const lineCount = lines.length;
+
   return (
-    <div className="window-content h-full flex flex-col bg-gray-900 text-gray-300 font-mono text-sm">
+    <div 
+      className="h-full flex flex-col bg-black text-oldgreen font-mono text-sm overflow-hidden"
+      onClick={() => textareaRef.current?.focus()}
+    >
       {/* Header */}
-      <div className=" text-oldgreen bg-black px-2 py-1 text-xs flex justify-between items-center">
-        <span>Nano - {fileName || 'Untitled'}</span>
+      <div className="bg-black border-b border-oldgreen border-dashed px-2 py-1 text-xs flex justify-between items-center">
+        <span>TextEditor - {displayFileName}</span>
         <span className="text-xs opacity-75">Ctrl+O Save | Ctrl+X Exit</span>
       </div>
       
       {/* Editor area */}
       <div className="flex-1 flex overflow-hidden">
         {/* Line numbers */}
-        <div className="bg-black text-oldgreen text-right pr-2 py-1 select-none border-r border-oldgreen min-w-[40px]">
+        <div className="bg-black text-oldgreen/50 text-right pr-2 py-1 select-none border-r border-dashed border-oldgreen min-w-[50px]">
           {lines.map(num => (
             <div key={num} className="leading-6">{num}</div>
           ))}
@@ -151,15 +163,15 @@ export default function Nano({ fileName, onClose }: NanoProps) {
       </div>
       
       {/* Status bar */}
-      <div className="text-oldgreen bg-black px-2 py-1 text-xs flex justify-between">
+      <div className="bg-black border-t border-oldgreen border-dashed px-2 py-1 text-xs flex justify-between">
         <span>
-          {statusMessage || `Modified | Lines: ${lines.length} | ${cursorLine + 1}:${cursorCol + 1}`}
+          {statusMessage || `Modified | Lines: ${lineCount} | ${cursorLine + 1}:${cursorCol + 1}`}
         </span>
         <span>UTF-8</span>
       </div>
       
       {/* Help footer */}
-      <div className=" text-oldgreen bg-black border-dashed border border-oldgreen px-2 py-1 text-xs flex justify-between overflow-x-auto">
+      <div className="bg-black border-t border-oldgreen border-dashed px-2 py-1 text-xs flex justify-between overflow-x-auto">
         <span>^G Help ^O WriteOut ^R Read File ^Y Prev Pg ^C Cur Pos</span>
         <span>^X Exit ^J Justify ^W Where is ^K Cut Text ^U UnCut Text</span>
       </div>
@@ -168,8 +180,8 @@ export default function Nano({ fileName, onClose }: NanoProps) {
 }
 
 // Metadata for the window system
-Nano.metadata = {
-  title: "Nano",
+TextEditor.metadata = {
+  title: "TextEditor",
   icon: (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
       <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487 1.687 18.75a2.169 2.169 0 0 0 .774 1.262l7.5 4.375a2.169 2.169 0 0 0 2.699 0l7.5-4.375a2.169 2.169 0 0 0 .774-1.262l-15.3-16.263Z" />
