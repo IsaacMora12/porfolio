@@ -13,9 +13,9 @@ export const CurriculumComponent = () => {
             <p className="text-sm glitch" data-text="San José, Costa Rica | isaacmora12@gmail.com">San José, Costa Rica |   <a href="mailto:isaacmora12@gmail.com" className="text-[#39ff14] hover:underline text-sm glitch" target="_blank" rel="noopener noreferrer">isaacmora12@gmail.com</a>
              </p>
             <div className="flex gap-4 mt-2">
-              <a href="https://portfolio.isaacmora.com" className="text-[#39ff14] hover:underline text-sm glitch" target="_blank" rel="noopener noreferrer">Portfolio</a>
+              <a href="https://isaacmoraportfolio.pages.dev/" className="text-[#39ff14] hover:underline text-sm glitch" target="_blank" rel="noopener noreferrer">Portfolio</a>
               <span className="text-sm glitch">|</span>
-              <a href="https://linkedin.com/in/isaac-mora" className="text-[#39ff14] hover:underline text-sm glitch" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+              <a href="https://linkedin.com/in/isaac-andrés-mora-rodríguez-aba953232" className="text-[#39ff14] hover:underline text-sm glitch" target="_blank" rel="noopener noreferrer">LinkedIn</a>
               <span className="text-sm glitch">|</span>
               <a href="https://github.com/IsaacMora12" className="text-[#39ff14] hover:underline text-sm glitch" target="_blank" rel="noopener noreferrer">Github</a>
             </div>
@@ -61,17 +61,6 @@ export const CurriculumComponent = () => {
         </div>
       </section>
 
-      <section className="mb-8 glitch" data-text="education-certifications">
-        <h2 className="text-xl font-bold mb-4 glitch">Education & Certifications</h2>
-        <ul className="space-y-1">
-          <li className="text-sm glitch pl-3">• DevOps Bootcamp with Azure: 12-week intensive training (+30 hours).</li>
-          <li className="text-sm glitch pl-3">• Kubernetes Track: Specialized 9-week program.</li>
-          <li className="text-sm glitch pl-3">• Professional DevOps Track: 9-week comprehensive learning path.</li>
-          <li className="text-sm glitch pl-3">• Professional Docker Course.</li>
-          <li className="text-sm glitch pl-3">• GitHub Actions Course.</li>
-          <li className="text-sm glitch pl-3">• Other certifications: VS Code & GitHub Copilot, Introduction to DevOps.</li>
-        </ul>
-      </section>
 
       <section className="mb-8 glitch" data-text="experience">
         <h2 className="text-xl font-bold mb-4 glitch">Professional Experience</h2>
@@ -90,6 +79,49 @@ export const CurriculumComponent = () => {
             <li className="text-sm glitch pl-3">• Creating maintainable and scalable code.</li>
           </ul>
         </div>
+      </section>
+           <section className="mb-8 glitch" data-text="Challenges and achievements">
+        <h2 className="text-xl font-bold mb-4 glitch">Challenges and achievements</h2>
+        <div className="mb-4 glitch">
+       
+          <ul className="ml-2 glitch space-y-1">
+            <li className=" glitch">
+                  <h3 className="text-lg font-bold glitch">Creating a fault-tolerant data orchestrator:</h3>
+              <p className="text-sm pl-3 ">We were facing an issue where large scale data migrations could fail resulting in massive data loss and wasted time. I designed a modular workflow system based on a Master/Worker pattern. By splitting the process into specialized executors (copy, pack, and paste) and processing data in batches of 1000 records, I created a system that can "remember" its progress. Now, if a failure occurs, the master runner continues exactly where it left off. This eliminated data loss and significantly improved the responsiveness of the user experience during heavy loads.</p>
+             </li>
+                <li className=" glitch">
+                  <h3 className="text-lg font-bold glitch">Creating a fault-tolerant data orchestrator:</h3>
+              <p className="text-sm pl-3 ">We were facing an issue where large scale data migrations could fail resulting in massive data loss and wasted time. I designed a modular workflow system based on a Master/Worker pattern. By splitting the process into specialized executors (copy, pack, and paste) and processing data in batches of 1000 records, I created a system that can "remember" its progress. Now, if a failure occurs, the master runner continues exactly where it left off. This eliminated data loss and significantly improved the responsiveness of the user experience during heavy loads.</p>
+             </li>
+                 <li className=" glitch">
+                  <h3 className="text-lg font-bold glitch">Engineering a plug-and-play visualization ecosystem:</h3>
+              <p className="text-sm pl-3 ">We had the need to create a system to facilitate the implementation of a centralized data visualization system, for that I developed a set of libraries for data visualization. I created a Python backend library that handles the heavy lifting: abstracting database calls, ensuring data traceability, and strictly sanitizing queries to prevent SQL injection, and through our sister project DDswitch we handle data mobility. On the front end, I created a React library that allows developers to embed interactive dashboards instantly.</p>
+             </li>
+                 <li className=" glitch">
+                  <h3 className="text-lg font-bold glitch">Strategic modernization of the technology stack:</h3>
+              <p className="text-sm pl-3 ">Maintaining a modern stack is often a tug of war between new features and stability. Instead of updating blindly, we analyze changes by performing a cost-benefit measurement for each major version jump. By prioritizing updates from "critical/urgent" to "uninterrupted/minor", I have kept our projects up to date with the latest patches and security features without a single minute of unplanned downtime.</p>
+             </li>
+                              <li className=" glitch">
+                  <h3 className="text-lg font-bold glitch">Interactive Dashboard Engine with Responsive Layouts:</h3>
+              <p className="text-sm pl-3 ">To give users complete creative freedom, I developed a drag-and-drop dashboard builder that allows for fully customized workspaces. The main innovation is an intelligent persistence system that saves the panel layout and size independently for each screen resolution. This ensures a 100% responsive experience where users can switch between monitors and mobile devices while maintaining an optimized and personalized layout for each screen size.</p>
+             </li>
+                              <li className=" glitch">
+                  <h3 className="text-lg font-bold glitch">Automated Deployment Workflow with Kamal & GitHub Actions:</h3>
+              <p className="text-sm pl-3 ">To eliminate the risks associated with manual deployments, I engineered an automated CI/CD pipeline leveraging GitHub Actions and Kamal. I orchestrated a complex Docker container environment, managing the lifecycle of the main application alongside PostgreSQL, Redis for key-value storage, and Celery/Celery Beat for asynchronous task processing—all behind a managed load balancer. By automating environment variables and secret injection within the GitHub virtual environment, I created a resilient "one-command" deployment process. This ensured consistent production environments and high availability while removing human error from the release cycle.</p>
+             </li>
+          </ul>
+        </div>
+      </section>
+            <section className="mb-8 glitch" data-text="education-certifications">
+        <h2 className="text-xl font-bold mb-4 glitch">Education & Certifications</h2>
+        <ul className="space-y-1">
+          <li className="text-sm glitch pl-3">• DevOps Bootcamp with Azure: 12-week intensive training (+30 hours).</li>
+          <li className="text-sm glitch pl-3">• Kubernetes Track: Specialized 9-week program.</li>
+          <li className="text-sm glitch pl-3">• Professional DevOps Track: 9-week comprehensive learning path.</li>
+          <li className="text-sm glitch pl-3">• Professional Docker Course.</li>
+          <li className="text-sm glitch pl-3">• GitHub Actions Course.</li>
+          <li className="text-sm glitch pl-3">• Other certifications: VS Code & GitHub Copilot, Introduction to DevOps.</li>
+        </ul>
       </section>
 
       <footer className="text-center glitch" data-text="footer">
